@@ -2,51 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
 <title>FlowPilot App</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#06101d;color:#eef5ff;font:14px system-ui}
-button,input,textarea,select{font:inherit}
-.a{display:grid;grid-template-columns:190px 1fr;min-height:100vh}
-aside{background:#081522;padding:18px 10px;border-right:1px solid #ffffff16}
-h2{margin:0 8px 20px}
-.n button{width:100%;border:0;background:0;color:#8ea2b9;text-align:left;padding:10px;border-radius:9px}
-.n .on,.n button:hover{background:#ffffff0b;color:white}
-main{padding:20px}
-.top{display:flex;justify-content:space-between;align-items:center}
-.top h1{margin:0}
-.m{color:#8196ad}
-.v{display:none;margin-top:18px}
-.v.on{display:block}
-.stats,.g{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
-.c,.p{border:1px solid #ffffff16;background:#ffffff06;border-radius:13px;padding:14px}
-.c b{display:block;font-size:27px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.it{border-top:1px solid #ffffff10;padding:10px 0}
-.btn{border:1px solid #ffffff1c;background:#ffffff08;color:#fff;padding:8px 10px;border-radius:8px}
-.pri{background:#7fe2ff;color:#06101d;border:0;font-weight:800}
-.chat{display:grid;grid-template-columns:240px 1fr;gap:10px}
-.cv{padding:10px;border:1px solid #ffffff12;border-radius:9px;margin:6px 0;cursor:pointer}
-.cv:hover,.cv.on{background:#7da9ff12}
-textarea{width:100%;min-height:100px;background:#071725;color:#fff;border:1px solid #ffffff16;border-radius:9px;padding:9px}
-table{width:100%;border-collapse:collapse}
-td,th{padding:10px;border-top:1px solid #ffffff10;text-align:left}
-.auto{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-select,input{background:#071725;color:#fff;border:1px solid #ffffff16;border-radius:8px;padding:8px}
-.ok{color:#7ce6b0}
-.modal{display:none;position:fixed;inset:0;background:#0009;place-items:center}
-.modal.on{display:grid}
-.box{background:#0b1929;padding:18px;border-radius:14px;width:min(380px,90vw)}
-.box input{width:100%;margin:5px 0}
-@media(max-width:760px){.a{grid-template-columns:1fr}
-aside{position:sticky;top:0;z-index:20;display:block;padding:9px 10px;background:#081522f2;border-right:0;border-bottom:1px solid #ffffff16;overflow-x:auto}
-aside h2{display:none}
-.n{display:flex;gap:4px;min-width:max-content}
-.n button{width:auto;white-space:nowrap}
-main{padding:14px}
-.stats,.g,.two,.chat,.auto{grid-template-columns:1fr}
-}
-
-</style>
+<link rel="stylesheet" href="app.css">
 <div class="a">
 <aside>
 <h2>FlowPilot AI</h2>
@@ -64,14 +20,14 @@ main{padding:14px}
 <h1 id="t">Dashboard</h1>
 <div class="m" id="sub">Przegląd sprzedaży</div>
 </div>
-<button class="btn pri" id="nl">+ Nowy lead</button>
+<div class="topActions"><button class="btn" id="sync"><span class="status" id="syncState">Dane demo</span></button><button class="btn pri" id="nl">+ Nowy lead</button></div>
 </div>
 <section class="v on" id="d">
 <div class="stats">
-<div class="c">Nowe leady<b>24</b>
+<div class="c">Nowe leady<b id="newCount">24</b>
 <span class="ok">+18%</span>
 </div>
-<div class="c">Do akceptacji<b>3</b>
+<div class="c">Do akceptacji<b id="approvalCount">3</b>
 <span>Wymagają decyzji</span>
 </div>
 <div class="c">Follow-up<b>7</b>
@@ -82,7 +38,7 @@ main{padding:14px}
 </div>
 </div>
 <div class="two">
-<div class="p">
+<div class="p" id="conversationList">
 <h3>AI Inbox</h3>
 <div class="it">
 <b>Marek Kowalski</b>
@@ -114,11 +70,11 @@ main{padding:14px}
 </div>
 <div class="p">
 <h3 id="who">Marek Kowalski</h3>
-<div class="it">Klient: Możecie oddzwonić jutro po 14:00?</div>
-<p class="m">AI: demo/zakup · wysoki priorytet</p>
+<div class="it" id="clientMessage">Klient: Możecie oddzwonić jutro po 14:00?</div>
+<p class="m" id="leadMeta">AI: demo/zakup · wysoki priorytet</p>
 <textarea id="r">Dzień dobry, możemy zadzwonić jutro o 14:30. Jeśli pasuje, zarezerwuję termin.</textarea>
 <p>
-<button class="btn" id="rg">↻ Ponownie</button> <button class="btn pri" id="ap">✓ Zatwierdź</button>
+<button class="btn" id="rg">↻ Ponownie</button> <button class="btn" id="rj">Odrzuć</button> <button class="btn pri" id="ap">✓ Zatwierdź</button>
 </p>
 <div id="ms" class="ok">
 </div>
@@ -173,9 +129,10 @@ main{padding:14px}
 <p class="m">Brak odpowiedzi uruchamia kolejny kontakt.</p>
 </div>
 <div class="p">
+<b style="color:#f2b84b">OCZEKUJE NA META</b>
 <h3>Messenger → CRM</h3>
-<p class="m">Szablon integracji.</p>
-<button class="btn" id="en">Włącz demo</button>
+<p class="m">Integracja gotowa do podłączenia po weryfikacji konta Meta.</p>
+<button class="btn" id="en" disabled>Weryfikacja wymagana</button>
 </div>
 </div>
 </section>
@@ -205,6 +162,11 @@ main{padding:14px}
 <div class="it">✓ FAQ</div>
 <div class="it">✓ Strona WWW</div>
 </div>
+<div class="p">
+<h3>Dane produkcyjne</h3>
+<div class="it" id="prodState">Tryb demonstracyjny</div>
+<button class="btn" id="connectData">Połącz panel</button>
+</div>
 </div>
 </section>
 </main>
@@ -219,10 +181,13 @@ main{padding:14px}
 </p>
 </div>
 </div>
-<script>
-let names={d:['Dashboard','Przegląd sprzedaży'],i:['AI Inbox','Odpowiedzi do akceptacji'],l:['Leady','Pipeline i scoring'],u:['Automatyzacje','Procesy w tle'],s:['Ustawienia','Kontrola AI']}
-;function go(v){document.querySelectorAll('.v').forEach(e=>e.classList.remove('on'));document.querySelectorAll('.n button').forEach(e=>e.classList.toggle('on',e.dataset.v==v));document.getElementById(v).classList.add('on');t.textContent=names[v][0];sub.textContent=names[v][1]}
-document.querySelectorAll('.n button').forEach(b=>b.onclick=()=>go(b.dataset.v));document.querySelectorAll('.cv').forEach(c=>c.onclick=()=>{document.querySelectorAll('.cv').forEach(q=>q.classList.remove('on'));c.classList.add('on');who.textContent=c.dataset.n;r.value=c.dataset.n[0]=='A'?'Dzień dobry, przygotujemy ofertę dla 3-osobowego zespołu. Z jakiego kanału macie najwięcej leadów?':c.dataset.n[0]=='R'?'Tak, możemy połączyć FlowPilot z CRM przez Make/API. Jaki system Państwo używają?':'Dzień dobry, możemy zadzwonić jutro o 14:30. Jeśli pasuje, zarezerwuję termin.'}
-);ap.onclick=()=>ms.textContent='✓ Zatwierdzono w trybie demo.';rg.onclick=()=>r.value='Dzień dobry! Czy jutro o 14:30 pasuje na krótką rozmowę o FlowPilot?';en.onclick=()=>en.textContent='Włączono';sv.onclick=()=>saved.textContent='✓ Zapisano';nl.onclick=()=>mo.classList.add('on');x.onclick=()=>mo.classList.remove('on');ad.onclick=()=>{rows.insertAdjacentHTML('afterbegin','<tr><td>'+(nn.value||'Nowy lead')+'</td><td>'+(cc.value||'—')+'</td><td>50</td><td>Nowy</td></tr>');mo.classList.remove('on');go('l')}
-
-</script>
+<div class="modal" id="auth">
+<div class="box">
+<h3>Połącz dane produkcyjne</h3>
+<p class="authHint">Wpisz klucz operatora. Klucz zostanie zapisany tylko w tej karcie przeglądarki.</p>
+<input id="operatorKey" type="password" placeholder="Klucz operatora" autocomplete="current-password">
+<div id="authError" class="bad"></div>
+<p><button class="btn" id="authCancel">Anuluj</button> <button class="btn pri" id="authConnect">Połącz</button></p>
+</div>
+</div>
+<script src="app.js"></script>
