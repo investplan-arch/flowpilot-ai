@@ -1,0 +1,20 @@
+{
+  "name": "flowpilot-reels",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts Reel out/reel.mp4 --codec=h264",
+    "render:reel": "remotion render src/index.ts Reel out/reel.mp4 --codec=h264"
+  },
+  "dependencies": {
+    "@remotion/cli": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "remotion": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "typescript": "latest"
+  }
+}
