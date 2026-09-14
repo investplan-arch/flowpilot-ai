@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - "remotion/src/FlowPilotExplainer.tsx"
+      - "remotion/src/FlowPilotExplainerMarketing.tsx"
       - "remotion/src/Root.tsx"
       - "remotion/package.json"
       - ".github/workflows/render-remotion-explainer.yml"
