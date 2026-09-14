@@ -194,12 +194,17 @@ const CTA: React.FC<{frame: number}> = ({frame}) => {
   );
 };
 
-export const FlowPilotExplainer: React.FC = () => {
+type FlowPilotExplainerProps = {
+  voiceover?: boolean;
+  captions?: boolean;
+};
+
+export const FlowPilotExplainer: React.FC<FlowPilotExplainerProps> = ({voiceover = true, captions = true}) => {
   const frame = useCurrentFrame();
   return (
     <AbsoluteFill style={{fontFamily: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif'}}>
       <Audio src={staticFile('audio/bed.wav')} volume={0.045} />
-      <Sequence from={8}><Audio src={VOICEOVER} volume={1} /></Sequence>
+      {voiceover ? <Sequence from={8}><Audio src={VOICEOVER} volume={1} /></Sequence> : null}
       <Sequence from={174} durationInFrames={18}><Audio src={staticFile('audio/notif.wav')} volume={0.34} /></Sequence>
       <Sequence from={462} durationInFrames={12}><Audio src={staticFile('audio/click.wav')} volume={0.36} /></Sequence>
       <Sequence from={500} durationInFrames={20}><Audio src={staticFile('audio/success.wav')} volume={0.32} /></Sequence>
@@ -207,7 +212,7 @@ export const FlowPilotExplainer: React.FC = () => {
       <InboxDemo frame={frame} />
       <Audience frame={frame} />
       <CTA frame={frame} />
-      <Caption frame={frame} />
+      {captions ? <Caption frame={frame} /> : null}
     </AbsoluteFill>
   );
 };
