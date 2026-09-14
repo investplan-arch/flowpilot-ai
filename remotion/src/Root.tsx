@@ -10,7 +10,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="FlowPilotAdFinal"
         component={FlowPilotAdFinal}
-        durationInFrames={600}
+        durationInFrames={660}
         fps={30}
         width={1080}
         height={1920}
