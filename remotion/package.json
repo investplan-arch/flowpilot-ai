@@ -6,6 +6,7 @@
     "studio": "npm run audio && remotion studio src/index.ts",
     "render": "npm run audio && remotion render src/index.ts FlowPilotAdFinal out/flowpilot-ad-final.mp4 --codec=h264 --crf=18",
     "render:final": "npm run render",
+    "render:explainer": "npm run audio && remotion render src/index.ts FlowPilotExplainer out/flowpilot-explainer.mp4 --codec=h264 --crf=18",
     "render:promo": "npm run audio && remotion render src/index.ts FlowPilotPromo out/flowpilot-promo.mp4 --codec=h264 --crf=18",
     "render:starter": "remotion render src/index.ts Reel out/reel.mp4 --codec=h264 --crf=18"
   },
