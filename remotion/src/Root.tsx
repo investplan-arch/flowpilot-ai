@@ -32,10 +32,10 @@ const CaptionRepair: React.FC<{frame: number}> = ({frame}) => {
           position: 'absolute',
           left: 0,
           right: 0,
-          bottom: 168,
-          height: 100,
+          bottom: 160,
+          height: 118,
           background,
-          zIndex: 70,
+          zIndex: 120,
         }}
       />
       {current ? (
@@ -47,7 +47,7 @@ const CaptionRepair: React.FC<{frame: number}> = ({frame}) => {
             bottom: 192,
             display: 'flex',
             justifyContent: 'center',
-            zIndex: 80,
+            zIndex: 130,
           }}
         >
           <div
@@ -75,16 +75,11 @@ const CaptionRepair: React.FC<{frame: number}> = ({frame}) => {
 
 const TransitionRepair: React.FC<{frame: number}> = ({frame}) => {
   if (frame >= 110 && frame < 118) {
-    const opacity = interpolate(frame, [110, 118], [1, 0], {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-    });
     return (
       <AbsoluteFill
         style={{
-          zIndex: 100,
-          opacity,
-          background: 'linear-gradient(135deg,#10131b 0%,#335cff 100%)',
+          zIndex: 220,
+          background: 'linear-gradient(135deg,#11141d 0%,#335cff 100%)',
         }}
       />
     );
@@ -98,7 +93,7 @@ const TransitionRepair: React.FC<{frame: number}> = ({frame}) => {
     return (
       <AbsoluteFill
         style={{
-          zIndex: 100,
+          zIndex: 220,
           background: '#090b10',
           color: '#fff',
           fontFamily: FONT,
@@ -113,11 +108,7 @@ const TransitionRepair: React.FC<{frame: number}> = ({frame}) => {
   }
 
   if (frame >= 530 && frame < 538) {
-    const opacity = interpolate(frame, [530, 538], [1, 0], {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-    });
-    return <AbsoluteFill style={{zIndex: 100, background: '#090b10', opacity}} />;
+    return <AbsoluteFill style={{zIndex: 220, background: '#090b10'}} />;
   }
 
   return null;
