@@ -2,6 +2,7 @@ import React from 'react';
 import {
   AbsoluteFill,
   Audio,
+  Img,
   Sequence,
   interpolate,
   spring,
@@ -13,6 +14,11 @@ import {FlowPilotExplainer} from './FlowPilotExplainer';
 
 const VOICEOVER =
   'https://cdn.creativeclaw.co/u/5df41fd6/audio/a5f76cbf-61c0-4c61-9914-4ace786ee2ad.mp3';
+
+const BROLL_DAY =
+  'https://cdn.creativeclaw.co/u/5df41fd6/images/ea216ca2-aa94-4095-940b-b22bf9e4e90a.png';
+const BROLL_NIGHT =
+  'https://cdn.creativeclaw.co/u/5df41fd6/images/b58b00bb-680a-4d5c-8a28-df2a9534e9fa.png';
 
 const CTA_START = 828;
 const clamp = {extrapolateLeft: 'clamp' as const, extrapolateRight: 'clamp' as const};
@@ -29,24 +35,84 @@ const captions: CaptionSegment[] = [
   {from: 14, to: 82, text: 'Jeśli codziennie odpowiadasz', accent: 'codziennie', zone: 'bottom'},
   {from: 82, to: 132, text: 'klientom na te same pytania', accent: 'same', zone: 'bottom'},
   {from: 132, to: 190, text: 'FlowPilot może zdjąć z Ciebie tę pracę', accent: 'FlowPilot', zone: 'bottom'},
-
   {from: 218, to: 290, text: 'Wiadomość trafia do jednego panelu', accent: 'jednego panelu', zone: 'top'},
   {from: 290, to: 368, text: 'System sprawdza przebieg rozmowy', accent: 'sprawdza', zone: 'top'},
   {from: 368, to: 445, text: 'i przygotowuje propozycję odpowiedzi', accent: 'propozycję', zone: 'top'},
-
   {from: 458, to: 505, text: 'Ty ją czytasz', accent: 'Ty', zone: 'top'},
   {from: 505, to: 548, text: 'poprawiasz, jeśli chcesz…', accent: 'poprawiasz', zone: 'top'},
   {from: 548, to: 575, text: 'i zatwierdzasz', accent: 'zatwierdzasz', zone: 'top'},
-
   {from: 585, to: 655, text: 'Odpowiadasz szybciej', accent: 'szybciej', zone: 'mid'},
   {from: 655, to: 718, text: 'Masz mniej chaosu', accent: 'mniej chaosu', zone: 'mid'},
   {from: 718, to: 830, text: 'i nie tracisz klientów przez zbyt późną odpowiedź', accent: 'nie tracisz klientów', zone: 'mid'},
-
   {from: 844, to: 910, text: 'Prowadzisz firmę?', accent: 'firmę', zone: 'cta'},
   {from: 910, to: 982, text: 'Napisz teraz słowo: FLOW', accent: 'FLOW', zone: 'cta'},
   {from: 982, to: 1065, text: 'Pokażemy Ci to na Twoim przykładzie', accent: 'Twoim przykładzie', zone: 'cta'},
   {from: 1065, to: 1128, text: 'Zobacz, ile czasu możesz odzyskać', accent: 'odzyskać', zone: 'cta'},
 ];
+
+const BrollShot: React.FC<{src: string; start: number; end: number; frame: number; direction?: 1 | -1}> = ({
+  src,
+  start,
+  end,
+  frame,
+  direction = 1,
+}) => {
+  if (frame < start || frame >= end) return null;
+  const local = frame - start;
+  const duration = end - start;
+  const fadeIn = interpolate(local, [0, 8], [0, 1], clamp);
+  const fadeOut = interpolate(local, [duration - 8, duration], [1, 0], clamp);
+  const scale = interpolate(local, [0, duration], direction === 1 ? [1.02, 1.085] : [1.085, 1.02], clamp);
+  const y = interpolate(local, [0, duration], direction === 1 ? [0, -18] : [-18, 0], clamp);
+
+  return (
+    <AbsoluteFill style={{zIndex: 220, overflow: 'hidden', opacity: fadeIn * fadeOut, background: '#090b10'}}>
+      <Img
+        src={src}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          transform: `scale(${scale}) translateY(${y}px)`,
+        }}
+      />
+      <AbsoluteFill
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(4,7,13,.16) 0%, rgba(4,7,13,.02) 38%, rgba(4,7,13,.72) 100%)',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: 70,
+          left: 58,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '10px 14px',
+          borderRadius: 999,
+          background: 'rgba(8,11,18,.62)',
+          border: '1px solid rgba(255,255,255,.12)',
+          color: '#fff',
+          fontSize: 20,
+          fontWeight: 820,
+          backdropFilter: 'blur(10px)',
+        }}
+      >
+        <span style={{width: 10, height: 10, borderRadius: 99, background: '#ff5c67'}} />
+        Tak wygląda codzienny chaos
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+const BrollMontage: React.FC<{frame: number}> = ({frame}) => (
+  <>
+    <BrollShot src={BROLL_DAY} start={8} end={98} frame={frame} direction={1} />
+    <BrollShot src={BROLL_NIGHT} start={90} end={202} frame={frame} direction={-1} />
+  </>
+);
 
 const DynamicCaption: React.FC<{frame: number}> = ({frame}) => {
   const {fps} = useVideoConfig();
@@ -136,6 +202,7 @@ export const FlowPilotExplainerMarketing: React.FC = () => {
     <AbsoluteFill>
       <FlowPilotExplainer voiceover={false} captions={false} />
       <Sequence from={8}><Audio src={VOICEOVER} volume={1} /></Sequence>
+      <BrollMontage frame={frame} />
       <Sequence from={CTA_START}><Audio src={staticFile('audio/bed.wav')} volume={0.035} /></Sequence>
       <Sequence from={CTA_START + 80} durationInFrames={18}><Audio src={staticFile('audio/success.wav')} volume={0.24} /></Sequence>
       <MarketingClose frame={frame} />
