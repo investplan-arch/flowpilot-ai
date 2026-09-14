@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Composition, interpolate, useCurrentFrame} from 'remotion';
 import {FlowPilotAdFinal} from './FlowPilotAdFinal';
-import {FlowPilotExplainer} from './FlowPilotExplainer';
+import {FlowPilotExplainerMarketing} from './FlowPilotExplainerMarketing';
 import {FlowPilotPromo} from './FlowPilotPromo';
 import {Reel} from './Reel';
 
@@ -113,7 +113,7 @@ export const RemotionRoot: React.FC = () => {
   return (
     <>
       <Composition id="FlowPilotAdFinal" component={FinalAdWrapper} durationInFrames={660} fps={30} width={1080} height={1920} />
-      <Composition id="FlowPilotExplainer" component={FlowPilotExplainer} durationInFrames={900} fps={30} width={1080} height={1920} />
+      <Composition id="FlowPilotExplainer" component={FlowPilotExplainerMarketing} durationInFrames={1080} fps={30} width={1080} height={1920} />
       <Composition id="FlowPilotPromo" component={FlowPilotPromo} durationInFrames={450} fps={30} width={1080} height={1920} />
       <Composition
         id="Reel"
