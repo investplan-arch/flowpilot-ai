@@ -24,7 +24,7 @@ def write_wav(name: str, samples: list[float]) -> None:
         w.writeframes(bytes(pcm))
 
 
-def make_bed(seconds: float = 20.0) -> list[float]:
+def make_bed(seconds: float = 22.0) -> list[float]:
     n = int(SR * seconds)
     out = [0.0] * n
     rng = random.Random(7)
