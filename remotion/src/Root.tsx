@@ -28,46 +28,10 @@ const CaptionRepair: React.FC<{frame: number}> = ({frame}) => {
 
   return (
     <>
-      <div
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 160,
-          height: 118,
-          background,
-          zIndex: 120,
-        }}
-      />
+      <div style={{position: 'absolute', left: 0, right: 0, bottom: 160, height: 118, background, zIndex: 120}} />
       {current ? (
-        <div
-          style={{
-            position: 'absolute',
-            left: 62,
-            right: 62,
-            bottom: 192,
-            display: 'flex',
-            justifyContent: 'center',
-            zIndex: 130,
-          }}
-        >
-          <div
-            style={{
-              padding: '12px 18px',
-              borderRadius: 13,
-              background: 'rgba(9,11,16,.94)',
-              color: '#fff',
-              fontFamily: FONT,
-              fontSize: 28,
-              lineHeight: 1.15,
-              fontWeight: 800,
-              letterSpacing: -0.6,
-              textAlign: 'center',
-              boxShadow: '0 10px 35px rgba(0,0,0,.14)',
-            }}
-          >
-            {current.text}
-          </div>
+        <div style={{position: 'absolute', left: 62, right: 62, bottom: 192, display: 'flex', justifyContent: 'center', zIndex: 130}}>
+          <div style={{padding: '12px 18px', borderRadius: 13, background: 'rgba(9,11,16,.94)', color: '#fff', fontFamily: FONT, fontSize: 28, lineHeight: 1.15, fontWeight: 800, letterSpacing: -0.6, textAlign: 'center', boxShadow: '0 10px 35px rgba(0,0,0,.14)'}}>{current.text}</div>
         </div>
       ) : null}
     </>
@@ -80,10 +44,7 @@ const TransitionRepair: React.FC<{frame: number}> = ({frame}) => {
   }
 
   if (frame >= 405 && frame < 413) {
-    const p = interpolate(frame, [405, 409, 413], [0, 1, 0], {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-    });
+    const p = interpolate(frame, [405, 409, 413], [0, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
     return (
       <AbsoluteFill style={{zIndex: 220, background: '#090b10', color: '#fff', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
         <div style={{fontSize: 112, fontWeight: 950, letterSpacing: -7, opacity: p}}>GOTOWE.</div>
@@ -113,21 +74,9 @@ export const RemotionRoot: React.FC = () => {
   return (
     <>
       <Composition id="FlowPilotAdFinal" component={FinalAdWrapper} durationInFrames={660} fps={30} width={1080} height={1920} />
-      <Composition id="FlowPilotExplainer" component={FlowPilotExplainerMarketing} durationInFrames={1080} fps={30} width={1080} height={1920} />
+      <Composition id="FlowPilotExplainer" component={FlowPilotExplainerMarketing} durationInFrames={1140} fps={30} width={1080} height={1920} />
       <Composition id="FlowPilotPromo" component={FlowPilotPromo} durationInFrames={450} fps={30} width={1080} height={1920} />
-      <Composition
-        id="Reel"
-        component={Reel}
-        durationInFrames={450}
-        fps={30}
-        width={1080}
-        height={1920}
-        defaultProps={{
-          title: 'FlowPilot AI',
-          subtitle: 'Automatyzuj obsługę klientów i odzyskaj czas',
-          cta: 'Zobacz, jak to działa',
-        }}
-      />
+      <Composition id="Reel" component={Reel} durationInFrames={450} fps={30} width={1080} height={1920} defaultProps={{title: 'FlowPilot AI', subtitle: 'Automatyzuj obsługę klientów i odzyskaj czas', cta: 'Zobacz, jak to działa'}} />
     </>
   );
 };
