@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Composition, interpolate, useCurrentFrame} from 'remotion';
 import {FlowPilotAdFinal} from './FlowPilotAdFinal';
+import {FlowPilotExplainer} from './FlowPilotExplainer';
 import {FlowPilotPromo} from './FlowPilotPromo';
 import {Reel} from './Reel';
 
@@ -75,14 +76,7 @@ const CaptionRepair: React.FC<{frame: number}> = ({frame}) => {
 
 const TransitionRepair: React.FC<{frame: number}> = ({frame}) => {
   if (frame >= 110 && frame < 118) {
-    return (
-      <AbsoluteFill
-        style={{
-          zIndex: 220,
-          background: 'linear-gradient(135deg,#11141d 0%,#335cff 100%)',
-        }}
-      />
-    );
+    return <AbsoluteFill style={{zIndex: 220, background: 'linear-gradient(135deg,#11141d 0%,#335cff 100%)'}} />;
   }
 
   if (frame >= 405 && frame < 413) {
@@ -91,17 +85,7 @@ const TransitionRepair: React.FC<{frame: number}> = ({frame}) => {
       extrapolateRight: 'clamp',
     });
     return (
-      <AbsoluteFill
-        style={{
-          zIndex: 220,
-          background: '#090b10',
-          color: '#fff',
-          fontFamily: FONT,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <AbsoluteFill style={{zIndex: 220, background: '#090b10', color: '#fff', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
         <div style={{fontSize: 112, fontWeight: 950, letterSpacing: -7, opacity: p}}>GOTOWE.</div>
       </AbsoluteFill>
     );
@@ -128,24 +112,9 @@ const FinalAdWrapper: React.FC = () => {
 export const RemotionRoot: React.FC = () => {
   return (
     <>
-      <Composition
-        id="FlowPilotAdFinal"
-        component={FinalAdWrapper}
-        durationInFrames={660}
-        fps={30}
-        width={1080}
-        height={1920}
-      />
-
-      <Composition
-        id="FlowPilotPromo"
-        component={FlowPilotPromo}
-        durationInFrames={450}
-        fps={30}
-        width={1080}
-        height={1920}
-      />
-
+      <Composition id="FlowPilotAdFinal" component={FinalAdWrapper} durationInFrames={660} fps={30} width={1080} height={1920} />
+      <Composition id="FlowPilotExplainer" component={FlowPilotExplainer} durationInFrames={900} fps={30} width={1080} height={1920} />
+      <Composition id="FlowPilotPromo" component={FlowPilotPromo} durationInFrames={450} fps={30} width={1080} height={1920} />
       <Composition
         id="Reel"
         component={Reel}
