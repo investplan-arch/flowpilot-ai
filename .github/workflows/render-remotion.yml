@@ -1,0 +1,46 @@
+name: Render Remotion Reel
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "remotion/**"
+      - ".github/workflows/render-remotion.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: remotion
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Render FlowPilot promo
+        run: npm run render
+
+      - name: Verify MP4
+        run: test -s out/flowpilot-promo.mp4
+
+      - name: Upload reel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flowpilot-promo
+          path: remotion/out/flowpilot-promo.mp4
+          if-no-files-found: error
