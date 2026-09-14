@@ -11,19 +11,22 @@ import {
 } from 'remotion';
 
 const VOICEOVER =
-  'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/862b6424-2c5a-4666-9273-5f4186136381.mp3';
+  'https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/b408bc00-2b85-46a7-af23-1fd4d3d51919.mp3';
 
 const C = {
-  bg: '#050915',
-  panel: '#0c1324',
-  panel2: '#121d33',
-  white: '#f8fbff',
-  muted: '#98a6bd',
-  blue: '#4f7cff',
-  cyan: '#55d8ff',
-  green: '#55df9a',
-  red: '#ff596d',
-  amber: '#ffb84d',
+  ink: '#101114',
+  text: '#17181c',
+  sub: '#6f7480',
+  line: '#e7e9ee',
+  soft: '#f5f6f8',
+  white: '#ffffff',
+  blue: '#335cff',
+  blueSoft: '#eef2ff',
+  green: '#119b69',
+  greenSoft: '#eaf8f2',
+  red: '#dc4052',
+  redSoft: '#fff0f2',
+  dark: '#090b10',
 };
 
 const clamp = {
@@ -31,399 +34,406 @@ const clamp = {
   extrapolateRight: 'clamp' as const,
 };
 
-const appear = (frame: number, fps: number, delay = 0) =>
+const appear = (frame: number, fps: number, delay = 0, damping = 18) =>
   spring({
     frame: Math.max(0, frame - delay),
     fps,
-    config: {damping: 16, stiffness: 190, mass: 0.72},
+    config: {damping, stiffness: 180, mass: 0.72},
   });
 
-const fade = (frame: number, start: number, end: number) =>
+const sceneOpacity = (frame: number, start: number, end: number) =>
   interpolate(frame, [start, start + 8, end - 8, end], [0, 1, 1, 0], clamp);
 
-const Brand: React.FC = () => (
-  <div
-    style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 12,
-      padding: '13px 19px',
-      borderRadius: 999,
-      border: '1px solid rgba(255,255,255,.13)',
-      background: 'rgba(255,255,255,.06)',
-      fontSize: 25,
-      fontWeight: 850,
-      letterSpacing: -0.5,
-    }}
-  >
-    <span
+const Logo: React.FC<{light?: boolean}> = ({light = false}) => (
+  <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+    <div
       style={{
-        width: 14,
-        height: 14,
-        borderRadius: 99,
+        width: 34,
+        height: 34,
+        borderRadius: 11,
         background: C.blue,
-        boxShadow: '0 0 28px rgba(79,124,255,.95)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 8px 24px rgba(51,92,255,.28)',
       }}
-    />
-    FlowPilot AI
+    >
+      <div style={{width: 14, height: 14, borderRadius: 99, border: '4px solid white', borderTopColor: 'transparent'}} />
+    </div>
+    <div style={{fontSize: 28, fontWeight: 850, letterSpacing: -1, color: light ? C.white : C.ink}}>FlowPilot</div>
   </div>
 );
 
-const Shell: React.FC<React.PropsWithChildren<{frame: number}>> = ({frame, children}) => {
-  const drift = interpolate(frame, [0, 600], [-130, 160], clamp);
+const PageShell: React.FC<React.PropsWithChildren<{dark?: boolean}>> = ({dark = false, children}) => (
+  <AbsoluteFill
+    style={{
+      background: dark ? C.dark : '#f3f4f7',
+      color: dark ? C.white : C.text,
+      fontFamily: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
+      overflow: 'hidden',
+    }}
+  >
+    {children}
+  </AbsoluteFill>
+);
+
+const StatusPill: React.FC<{children: React.ReactNode; kind?: 'green' | 'blue' | 'red'}> = ({children, kind = 'blue'}) => {
+  const map = {
+    blue: {bg: C.blueSoft, fg: C.blue},
+    green: {bg: C.greenSoft, fg: C.green},
+    red: {bg: C.redSoft, fg: C.red},
+  };
+  const s = map[kind];
   return (
-    <AbsoluteFill
-      style={{
-        background: `radial-gradient(circle at 72% 9%, rgba(79,124,255,.19), transparent 34%), radial-gradient(circle at 10% 74%, rgba(85,216,255,.08), transparent 30%), ${C.bg}`,
-        color: C.white,
-        fontFamily:
-          'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          opacity: 0.12,
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)',
-          backgroundSize: '72px 72px',
-          transform: `translateY(${drift}px)`,
-        }}
-      />
-      <div style={{position: 'absolute', top: 74, left: 72, right: 72, height: 5, borderRadius: 99, background: 'rgba(255,255,255,.09)'}}>
-        <div
-          style={{
-            height: '100%',
-            width: `${interpolate(frame, [0, 599], [2, 100], clamp)}%`,
-            borderRadius: 99,
-            background: `linear-gradient(90deg, ${C.blue}, ${C.cyan})`,
-          }}
-        />
-      </div>
+    <div style={{display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 13px', borderRadius: 999, background: s.bg, color: s.fg, fontSize: 20, fontWeight: 760}}>
       {children}
-    </AbsoluteFill>
-  );
-};
-
-const CaptionRail: React.FC<{frame: number}> = ({frame}) => {
-  const captions = [
-    {from: 9, to: 50, text: 'Klient napisał.'},
-    {from: 50, to: 104, text: 'Minuta później kupił u konkurencji?'},
-    {from: 104, to: 205, text: 'FlowPilot przygotowuje odpowiedź, zanim otworzysz inbox.'},
-    {from: 205, to: 300, text: 'Zna kontekst rozmowy, ton marki i daje gotowy draft.'},
-    {from: 300, to: 388, text: 'Ty tylko sprawdzasz i zatwierdzasz.'},
-    {from: 388, to: 450, text: 'Mniej ręcznego odpisywania.'},
-    {from: 450, to: 510, text: 'Więcej obsłużonych klientów.'},
-    {from: 510, to: 590, text: 'Napisz „FLOW” po demo.'},
-  ];
-  const current = captions.find((c) => frame >= c.from && frame < c.to);
-  if (!current) return null;
-  const local = frame - current.from;
-  const p = Math.min(1, local / 5);
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: 80,
-        right: 80,
-        bottom: 260,
-        display: 'flex',
-        justifyContent: 'center',
-        pointerEvents: 'none',
-        zIndex: 50,
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 900,
-          padding: '19px 27px',
-          borderRadius: 24,
-          background: 'rgba(2,5,12,.78)',
-          border: '1px solid rgba(255,255,255,.13)',
-          boxShadow: '0 20px 50px rgba(0,0,0,.28)',
-          fontSize: 36,
-          lineHeight: 1.12,
-          textAlign: 'center',
-          fontWeight: 850,
-          letterSpacing: -1,
-          opacity: p,
-          transform: `translateY(${interpolate(p, [0, 1], [18, 0])}px)`,
-        }}
-      >
-        {current.text}
-      </div>
     </div>
   );
 };
 
 const HookScene: React.FC<{frame: number}> = ({frame}) => {
   const {fps} = useVideoConfig();
-  const p1 = appear(frame, fps, 0);
-  const p2 = appear(frame, fps, 18);
-  const p3 = appear(frame, fps, 50);
-  const shake = frame > 48 && frame < 70 ? Math.sin(frame * 1.9) * (70 - frame) * 0.6 : 0;
+  const local = frame;
+  const p1 = appear(local, fps, 0);
+  const p2 = appear(local, fps, 15);
+  const p3 = appear(local, fps, 38);
+  const card = appear(local, fps, 8);
+  const timer = Math.max(0, Math.floor((frame - 28) / 15));
 
   return (
-    <div style={{position: 'absolute', inset: 0, padding: '135px 74px 330px', boxSizing: 'border-box', opacity: fade(frame, 0, 112)}}>
-      <div style={{opacity: p1}}><Brand /></div>
+    <PageShell dark>
+      <div style={{position: 'absolute', inset: 0, opacity: sceneOpacity(frame, 0, 135)}}>
+        <div style={{position: 'absolute', left: 62, right: 62, top: 70, display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: p1}}>
+          <Logo light />
+          <div style={{fontSize: 19, color: '#9196a3', fontWeight: 700}}>AI inbox • sprzedaż • obsługa</div>
+        </div>
 
-      <div style={{marginTop: 128, opacity: p1, transform: `translateY(${interpolate(p1, [0, 1], [42, 0])}px)`}}>
-        <div style={{fontSize: 40, color: C.muted, fontWeight: 850, letterSpacing: 0.4}}>TWÓJ INBOX, 21:47</div>
-        <div style={{fontSize: 116, lineHeight: 0.92, fontWeight: 980, letterSpacing: -7, marginTop: 18}}>
-          KLIENT
-          <br />
-          NAPISAŁ.
+        <div
+          style={{
+            position: 'absolute',
+            top: 210,
+            left: 62,
+            right: 62,
+            padding: '30px 34px',
+            borderRadius: 30,
+            background: '#141821',
+            border: '1px solid #252a35',
+            boxShadow: '0 34px 90px rgba(0,0,0,.35)',
+            opacity: card,
+            transform: `translateY(${interpolate(card, [0, 1], [-24, 0])}px)`,
+          }}
+        >
+          <div style={{display: 'flex', alignItems: 'center', gap: 18}}>
+            <div style={{width: 58, height: 58, borderRadius: 99, background: 'linear-gradient(135deg,#6d7cff,#a47cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 850}}>MK</div>
+            <div style={{flex: 1}}>
+              <div style={{fontSize: 26, fontWeight: 800}}>Michał K. • Messenger</div>
+              <div style={{fontSize: 24, color: '#b9bdc7', marginTop: 5}}>„Hej, ile kosztuje automatyzacja odpowiedzi?”</div>
+            </div>
+            <div style={{width: 14, height: 14, borderRadius: 99, background: '#ff5668', boxShadow: '0 0 0 7px rgba(255,86,104,.12)'}} />
+          </div>
+        </div>
+
+        <div style={{position: 'absolute', left: 62, right: 62, top: 560, opacity: p2, transform: `translateY(${interpolate(p2, [0, 1], [38, 0])}px)`}}>
+          <div style={{fontSize: 34, color: '#9297a5', fontWeight: 720, letterSpacing: -1}}>KLIENT PISZE TERAZ.</div>
+          <div style={{fontSize: 104, lineHeight: .94, fontWeight: 930, letterSpacing: -6, marginTop: 18}}>
+            TY ODPISZESZ
+            <br />
+            ZA GODZINĘ?
+          </div>
+        </div>
+
+        <div style={{position: 'absolute', left: 62, right: 62, top: 960, display: 'flex', alignItems: 'center', gap: 24, opacity: p3}}>
+          <div style={{padding: '18px 24px', borderRadius: 20, background: 'rgba(220,64,82,.10)', border: '1px solid rgba(220,64,82,.28)', color: '#ff7d8c', fontSize: 44, fontWeight: 900, letterSpacing: -2}}>
+            00:00:{String(timer).padStart(2, '0')}
+          </div>
+          <div style={{fontSize: 31, lineHeight: 1.12, color: '#c6cad2', fontWeight: 700}}>Każda minuta to szansa,
+            <br />że kupi gdzie indziej.</div>
+        </div>
+
+        <div style={{position: 'absolute', left: 62, right: 62, bottom: 195, height: 1, background: '#252936'}} />
+        <div style={{position: 'absolute', left: 62, right: 62, bottom: 118, display: 'flex', justifyContent: 'space-between', color: '#777d89', fontSize: 19, fontWeight: 650}}>
+          <span>FlowPilot • intelligent customer inbox</span>
+          <span>01 / 04</span>
         </div>
       </div>
-
-      <div
-        style={{
-          marginTop: 62,
-          display: 'flex',
-          gap: 18,
-          alignItems: 'center',
-          opacity: p2,
-          transform: `translateX(${shake}px) scale(${interpolate(p2, [0, 1], [0.94, 1])})`,
-        }}
-      >
-        <div style={{fontSize: 86, fontWeight: 980, color: C.red, letterSpacing: -4}}>60 s</div>
-        <div style={{fontSize: 42, lineHeight: 1.02, fontWeight: 850, maxWidth: 560}}>
-          i dalej czeka
-          <br />
-          na odpowiedź
-        </div>
-      </div>
-
-      <div
-        style={{
-          position: 'absolute',
-          left: 74,
-          right: 74,
-          bottom: 430,
-          padding: '28px 32px',
-          borderRadius: 30,
-          background: 'rgba(255,89,109,.11)',
-          border: '1px solid rgba(255,89,109,.36)',
-          opacity: p3,
-          transform: `translateY(${interpolate(p3, [0, 1], [35, 0])}px)`,
-        }}
-      >
-        <div style={{fontSize: 29, fontWeight: 800, color: '#ff9aa7'}}>Najdroższa odpowiedź?</div>
-        <div style={{fontSize: 43, lineHeight: 1.05, fontWeight: 920, marginTop: 8}}>Ta, której klient nie dostał na czas.</div>
-      </div>
-    </div>
+    </PageShell>
   );
 };
 
-const ChatBubble: React.FC<{text: string; right?: boolean; accent?: boolean; p: number}> = ({text, right, accent, p}) => (
-  <div style={{display: 'flex', justifyContent: right ? 'flex-end' : 'flex-start', opacity: p, transform: `translateY(${interpolate(p, [0, 1], [28, 0])}px)`}}>
-    <div
-      style={{
-        maxWidth: 720,
-        padding: '24px 28px',
-        borderRadius: 28,
-        background: accent ? `linear-gradient(135deg, ${C.blue}, #6d5cff)` : C.panel2,
-        border: accent ? '1px solid rgba(255,255,255,.14)' : '1px solid rgba(255,255,255,.07)',
-        fontSize: 33,
-        lineHeight: 1.18,
-        fontWeight: 700,
-        boxShadow: '0 18px 50px rgba(0,0,0,.22)',
-      }}
-    >
-      {text}
+const IconSquare: React.FC<{label: string; active?: boolean}> = ({label, active}) => (
+  <div style={{width: 44, height: 44, borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? '#20253a' : 'transparent', color: active ? '#fff' : '#8e94a1', fontSize: 18, fontWeight: 820}}>{label}</div>
+);
+
+const Avatar: React.FC<{label: string; bg: string}> = ({label, bg}) => (
+  <div style={{width: 42, height: 42, borderRadius: 99, background: bg, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 850, flex: '0 0 auto'}}>{label}</div>
+);
+
+const ConversationRow: React.FC<{name: string; text: string; active?: boolean; time: string; avatar: string; bg: string}> = ({name, text, active, time, avatar, bg}) => (
+  <div style={{padding: '17px 16px', borderRadius: 16, background: active ? '#f2f5ff' : 'transparent', border: active ? '1px solid #dce4ff' : '1px solid transparent', display: 'flex', gap: 11, alignItems: 'flex-start'}}>
+    <Avatar label={avatar} bg={bg} />
+    <div style={{minWidth: 0, flex: 1}}>
+      <div style={{display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center'}}>
+        <div style={{fontSize: 18, fontWeight: 800, whiteSpace: 'nowrap'}}>{name}</div>
+        <div style={{fontSize: 13, color: C.sub}}>{time}</div>
+      </div>
+      <div style={{fontSize: 15, lineHeight: 1.28, color: C.sub, marginTop: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{text}</div>
     </div>
   </div>
 );
 
-const DraftScene: React.FC<{frame: number}> = ({frame}) => {
+const Message: React.FC<{children: React.ReactNode; mine?: boolean}> = ({children, mine = false}) => (
+  <div style={{display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginTop: 16}}>
+    <div style={{maxWidth: 420, padding: '15px 18px', borderRadius: mine ? '18px 18px 5px 18px' : '18px 18px 18px 5px', background: mine ? C.blue : '#f1f2f5', color: mine ? '#fff' : C.text, fontSize: 17, lineHeight: 1.35, fontWeight: 590}}>
+      {children}
+    </div>
+  </div>
+);
+
+const AppWindow: React.FC<{frame: number}> = ({frame}) => {
   const {fps} = useVideoConfig();
-  const local = frame - 104;
-  const title = appear(local, fps, 0);
-  const b1 = appear(local, fps, 18);
-  const b2 = appear(local, fps, 42);
-  const typing = interpolate(local, [48, 104], [0, 1], clamp);
-  const chips = appear(local, fps, 92);
-  const answer = 'Jasne — wdrożenie możemy zacząć od Messengera. Pokażę Ci najpierw prosty przepływ i zakres.';
-  const chars = Math.floor(answer.length * typing);
+  const local = frame - 115;
+  const win = appear(local, fps, 0);
+  const draft = appear(local, fps, 38);
+  const draftText = 'Jasne. Najpierw sprawdzimy, ile wiadomości obsługujesz i zbudujemy prosty przepływ dla Messengera. Mogę pokazać Ci demo na Twoim przykładzie.';
+  const typing = interpolate(local, [40, 105], [0, 1], clamp);
+  const chars = Math.floor(draftText.length * typing);
+  const approved = local > 150;
+  const sendPulse = appear(local, fps, 150);
+  const cursorP = interpolate(local, [108, 145], [0, 1], clamp);
+  const cursorX = interpolate(cursorP, [0, 1], [810, 874]);
+  const cursorY = interpolate(cursorP, [0, 1], [590, 655]);
 
   return (
-    <div style={{position: 'absolute', inset: 0, padding: '130px 68px 330px', boxSizing: 'border-box', opacity: fade(frame, 100, 304)}}>
-      <div style={{opacity: title}}>
-        <div style={{fontSize: 28, color: C.cyan, fontWeight: 900, letterSpacing: 1}}>FLOWPILOT • LIVE DRAFT</div>
-        <div style={{fontSize: 75, lineHeight: 1.0, fontWeight: 960, letterSpacing: -4, marginTop: 14}}>
-          Zanim wejdziesz w inbox,
-          <br />
-          draft już czeka.
-        </div>
+    <div
+      style={{
+        position: 'absolute',
+        left: 48,
+        right: 48,
+        top: 100,
+        bottom: 315,
+        borderRadius: 32,
+        background: C.white,
+        border: '1px solid #dfe2e8',
+        boxShadow: '0 44px 110px rgba(23,28,40,.16)',
+        overflow: 'hidden',
+        opacity: win,
+        transform: `translateY(${interpolate(win, [0, 1], [30, 0])}px) scale(${interpolate(win, [0, 1], [.975, 1])})`,
+      }}
+    >
+      <div style={{height: 58, borderBottom: `1px solid ${C.line}`, display: 'flex', alignItems: 'center', padding: '0 18px', gap: 10, background: '#fbfbfc'}}>
+        <div style={{width: 10, height: 10, borderRadius: 99, background: '#ff625a'}} />
+        <div style={{width: 10, height: 10, borderRadius: 99, background: '#ffbe3d'}} />
+        <div style={{width: 10, height: 10, borderRadius: 99, background: '#31c353'}} />
+        <div style={{marginLeft: 16, height: 32, width: 470, borderRadius: 10, background: '#f1f2f5', display: 'flex', alignItems: 'center', padding: '0 13px', color: '#9a9fab', fontSize: 14}}>app.flowpilot.ai / inbox</div>
       </div>
 
-      <div
-        style={{
-          marginTop: 74,
-          padding: 34,
-          borderRadius: 42,
-          background: 'rgba(12,19,36,.92)',
-          border: '1px solid rgba(255,255,255,.09)',
-          boxShadow: '0 34px 90px rgba(0,0,0,.34)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 24,
-        }}
-      >
-        <ChatBubble text="Hej, robicie automatyzację odpowiedzi na Messengerze?" p={b1} />
-        <ChatBubble text={answer.slice(0, chars) + (typing < 1 ? '▍' : '')} right accent p={b2} />
+      <div style={{display: 'grid', gridTemplateColumns: '72px 270px 1fr 285px', height: 'calc(100% - 58px)'}}>
+        <div style={{background: '#11141d', padding: '18px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10}}>
+          <div style={{width: 42, height: 42, borderRadius: 13, background: C.blue, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center'}}><div style={{width: 14, height: 14, borderRadius: 99, border: '4px solid white', borderTopColor: 'transparent'}} /></div>
+          <IconSquare label="IN" active />
+          <IconSquare label="AI" />
+          <IconSquare label="CL" />
+          <IconSquare label="⚙" />
+          <div style={{flex: 1}} />
+          <Avatar label="DS" bg="#353a48" />
+        </div>
 
-        <div style={{display: 'flex', gap: 13, flexWrap: 'wrap', marginTop: 6, opacity: chips}}>
-          {['Kontekst rozmowy ✓', 'Ton marki ✓', 'Warunki oferty ✓'].map((label) => (
-            <div key={label} style={{padding: '12px 16px', borderRadius: 999, background: 'rgba(85,223,154,.09)', border: '1px solid rgba(85,223,154,.24)', color: '#9cf4c5', fontSize: 24, fontWeight: 820}}>
-              {label}
+        <div style={{borderRight: `1px solid ${C.line}`, padding: 18, overflow: 'hidden'}}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <div style={{fontSize: 20, fontWeight: 850}}>Inbox</div>
+            <StatusPill>12 nowych</StatusPill>
+          </div>
+          <div style={{height: 36, borderRadius: 11, background: C.soft, marginTop: 18, padding: '0 12px', color: '#a1a5ae', display: 'flex', alignItems: 'center', fontSize: 14}}>Szukaj rozmów</div>
+          <div style={{display: 'flex', flexDirection: 'column', gap: 5, marginTop: 13}}>
+            <ConversationRow name="Michał K." text="Hej, ile kosztuje automatyzacja…" active time="teraz" avatar="MK" bg="linear-gradient(135deg,#6978ff,#ad7bff)" />
+            <ConversationRow name="Studio Forma" text="Możemy umówić demo?" time="3m" avatar="SF" bg="#0aa87f" />
+            <ConversationRow name="Klaudia P." text="Czy działa też na Instagramie?" time="8m" avatar="KP" bg="#f0774d" />
+            <ConversationRow name="Auto-Lux" text="Wyślij proszę ofertę" time="12m" avatar="AL" bg="#3856c9" />
+          </div>
+        </div>
+
+        <div style={{display: 'flex', flexDirection: 'column', minWidth: 0}}>
+          <div style={{height: 78, borderBottom: `1px solid ${C.line}`, padding: '0 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+              <Avatar label="MK" bg="linear-gradient(135deg,#6978ff,#ad7bff)" />
+              <div>
+                <div style={{fontSize: 18, fontWeight: 850}}>Michał K.</div>
+                <div style={{fontSize: 13, color: C.sub, marginTop: 2}}>Messenger • aktywny teraz</div>
+              </div>
             </div>
-          ))}
+            <StatusPill kind="green">● lead aktywny</StatusPill>
+          </div>
+          <div style={{padding: '24px 25px', flex: 1, background: '#fff'}}>
+            <div style={{fontSize: 13, color: '#a0a4ad', fontWeight: 700, textAlign: 'center'}}>DZISIAJ • 08:01</div>
+            <Message>Hej, ile kosztuje automatyzacja odpowiedzi na Messengerze?</Message>
+            <Message>Chodzi mi o to, żeby nie tracić klientów, kiedy nie jestem przy telefonie.</Message>
+          </div>
+          <div style={{padding: 18, borderTop: `1px solid ${C.line}`, background: '#fbfbfc'}}>
+            <div style={{border: `1px solid ${approved ? '#a9dfc7' : '#d9dce3'}`, borderRadius: 16, background: approved ? '#fbfffd' : '#fff', padding: '14px 15px'}}>
+              <div style={{fontSize: 16, lineHeight: 1.4, color: '#4b4f58', minHeight: 48}}>{approved ? draftText : 'Napisz wiadomość…'}</div>
+              <div style={{display: 'flex', justifyContent: 'space-between', marginTop: 12, alignItems: 'center'}}>
+                <div style={{display: 'flex', gap: 8, color: '#9398a3', fontSize: 16}}><span>＋</span><span>☺</span><span>↗</span></div>
+                <div style={{padding: '9px 14px', borderRadius: 10, background: approved ? C.green : '#e9ebef', color: approved ? '#fff' : '#a2a6ae', fontSize: 14, fontWeight: 800}}>{approved ? 'Wysłano ✓' : 'Wyślij'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{borderLeft: `1px solid ${C.line}`, background: '#fbfbfc', padding: 18}}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <div style={{fontSize: 17, fontWeight: 850}}>FlowPilot AI</div>
+            <div style={{width: 8, height: 8, borderRadius: 99, background: '#25b878'}} />
+          </div>
+          <div style={{fontSize: 13, color: C.sub, marginTop: 4}}>Sugestia odpowiedzi</div>
+
+          <div style={{marginTop: 18, padding: 16, borderRadius: 17, background: '#fff', border: `1px solid ${C.line}`, boxShadow: '0 10px 30px rgba(40,45,60,.05)', opacity: draft, transform: `translateY(${interpolate(draft, [0, 1], [16, 0])}px)`}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: C.green, fontWeight: 800}}><span style={{width: 7, height: 7, borderRadius: 99, background: C.green}} /> GOTOWY DRAFT</div>
+            <div style={{fontSize: 15, lineHeight: 1.45, color: '#373b43', marginTop: 11, minHeight: 122}}>{draftText.slice(0, chars)}{typing < 1 ? '▍' : ''}</div>
+            <div style={{display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 14}}>
+              <StatusPill>kontekst</StatusPill>
+              <StatusPill>ton marki</StatusPill>
+            </div>
+          </div>
+
+          <div style={{marginTop: 14, padding: 15, borderRadius: 16, border: `1px solid ${C.line}`, background: '#fff', opacity: draft}}>
+            <div style={{fontSize: 12, color: C.sub, fontWeight: 750}}>DLACZEGO TA ODPOWIEDŹ?</div>
+            <div style={{fontSize: 13, lineHeight: 1.42, color: '#5e626c', marginTop: 9}}>Klient pyta o cenę, ale najpierw warto ustalić zakres i zaprosić go do krótkiego demo.</div>
+          </div>
+
+          <div style={{display: 'flex', gap: 8, marginTop: 14, opacity: draft}}>
+            <div style={{flex: 1, padding: '11px 10px', borderRadius: 11, border: `1px solid ${C.line}`, background: '#fff', textAlign: 'center', fontSize: 13, fontWeight: 780, color: '#5e626c'}}>Edytuj</div>
+            <div style={{flex: 1.45, padding: '11px 10px', borderRadius: 11, background: approved ? C.green : C.blue, color: '#fff', textAlign: 'center', fontSize: 13, fontWeight: 820, boxShadow: approved ? '0 10px 24px rgba(17,155,105,.2)' : '0 10px 24px rgba(51,92,255,.22)', transform: `scale(${1 + 0.025 * sendPulse})`}}>{approved ? 'Zatwierdzono ✓' : 'Zatwierdź'}</div>
+          </div>
         </div>
       </div>
+
+      {local >= 105 && local < 165 ? (
+        <div style={{position: 'absolute', left: cursorX, top: cursorY, width: 24, height: 31, zIndex: 40, transform: `rotate(-12deg) scale(${local > 144 && local < 152 ? .82 : 1})`, filter: 'drop-shadow(0 3px 3px rgba(0,0,0,.24))'}}>
+          <div style={{width: 0, height: 0, borderLeft: '11px solid transparent', borderRight: '11px solid transparent', borderBottom: '28px solid #111', transform: 'rotate(-35deg)'}} />
+        </div>
+      ) : null}
     </div>
   );
 };
 
-const ApprovalScene: React.FC<{frame: number}> = ({frame}) => {
+const ProductScene: React.FC<{frame: number}> = ({frame}) => {
   const {fps} = useVideoConfig();
-  const local = frame - 292;
-  const title = appear(local, fps, 0);
-  const left = appear(local, fps, 16);
-  const right = appear(local, fps, 28);
-  const button = appear(local, fps, 62);
-  const sent = local > 102;
+  const local = frame - 115;
+  const label = appear(local, fps, 5);
 
   return (
-    <div style={{position: 'absolute', inset: 0, padding: '130px 68px 330px', boxSizing: 'border-box', opacity: fade(frame, 292, 440)}}>
-      <div style={{opacity: title}}>
-        <div style={{fontSize: 29, color: C.muted, fontWeight: 900}}>AI ROBI PIERWSZY KROK. TY MASZ OSTATNIE SŁOWO.</div>
-        <div style={{fontSize: 78, lineHeight: 0.99, fontWeight: 970, letterSpacing: -4, marginTop: 18}}>Nie oddajesz kontroli.</div>
-      </div>
-
-      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22, marginTop: 64}}>
-        <div style={{padding: '30px 27px', borderRadius: 34, background: 'rgba(255,89,109,.08)', border: '1px solid rgba(255,89,109,.23)', opacity: left, transform: `translateX(${interpolate(left, [0, 1], [-34, 0])}px)`}}>
-          <div style={{fontSize: 25, color: '#ff9aa7', fontWeight: 900}}>RĘCZNIE</div>
-          <div style={{fontSize: 51, fontWeight: 960, marginTop: 16, letterSpacing: -2}}>Otwórz.</div>
-          <div style={{fontSize: 51, fontWeight: 960, letterSpacing: -2}}>Przeczytaj.</div>
-          <div style={{fontSize: 51, fontWeight: 960, letterSpacing: -2}}>Napisz.</div>
-          <div style={{fontSize: 28, color: C.muted, marginTop: 18}}>Za każdym razem od zera.</div>
+    <PageShell>
+      <div style={{position: 'absolute', inset: 0, opacity: sceneOpacity(frame, 110, 430)}}>
+        <div style={{position: 'absolute', left: 54, right: 54, top: 39, display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: label}}>
+          <div style={{fontSize: 22, color: C.sub, fontWeight: 720}}>PRAWDZIWY PRZEPŁYW. ZERO AUTOPILOTA BEZ KONTROLI.</div>
+          <StatusPill kind="green">● AI gotowe</StatusPill>
         </div>
-
-        <div style={{padding: '30px 27px', borderRadius: 34, background: 'rgba(79,124,255,.12)', border: '1px solid rgba(79,124,255,.38)', opacity: right, transform: `translateX(${interpolate(right, [0, 1], [34, 0])}px)`}}>
-          <div style={{fontSize: 25, color: '#9cb2ff', fontWeight: 900}}>FLOWPILOT</div>
-          <div style={{fontSize: 51, fontWeight: 960, marginTop: 16, letterSpacing: -2}}>Sprawdź.</div>
-          <div style={{fontSize: 51, fontWeight: 960, letterSpacing: -2}}>Kliknij.</div>
-          <div style={{fontSize: 51, fontWeight: 960, color: C.green, letterSpacing: -2}}>Gotowe.</div>
-          <div style={{fontSize: 28, color: C.muted, marginTop: 18}}>Draft jest już przygotowany.</div>
+        <AppWindow frame={frame} />
+        <div style={{position: 'absolute', left: 54, right: 54, bottom: 112, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+          <div>
+            <div style={{fontSize: 26, fontWeight: 850}}>AI układa odpowiedź. Ty decydujesz, co wychodzi do klienta.</div>
+            <div style={{fontSize: 20, color: C.sub, marginTop: 7}}>Kontekst rozmowy + zasady Twojej firmy + ręczna akceptacja.</div>
+          </div>
+          <div style={{fontSize: 18, color: '#a2a6af', fontWeight: 650}}>02 / 04</div>
         </div>
       </div>
-
-      <div
-        style={{
-          marginTop: 35,
-          height: 94,
-          borderRadius: 28,
-          background: sent ? C.green : C.blue,
-          color: sent ? '#052017' : C.white,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 34,
-          fontWeight: 960,
-          opacity: button,
-          transform: `scale(${interpolate(button, [0, 1], [0.93, 1])})`,
-          boxShadow: sent ? '0 20px 70px rgba(85,223,154,.2)' : '0 20px 70px rgba(79,124,255,.26)',
-        }}
-      >
-        {sent ? '✓ Odpowiedź wysłana' : 'Zatwierdź odpowiedź'}
-      </div>
-    </div>
+    </PageShell>
   );
 };
 
 const ResultScene: React.FC<{frame: number}> = ({frame}) => {
   const {fps} = useVideoConfig();
-  const local = frame - 432;
+  const local = frame - 410;
   const p1 = appear(local, fps, 0);
-  const p2 = appear(local, fps, 12);
+  const p2 = appear(local, fps, 15);
   const p3 = appear(local, fps, 30);
+  const p4 = appear(local, fps, 46);
 
-  const rows = [
-    ['01', 'Klient pisze', 'Messenger / Instagram / formularz'],
-    ['02', 'AI układa draft', 'w kontekście rozmowy'],
-    ['03', 'Ty zatwierdzasz', 'bez automatycznej wysyłki'],
+  const cards = [
+    {kicker: 'CZAS ODPOWIEDZI', old: '58 min', next: '2 min', note: 'draft czeka, zanim otworzysz inbox'},
+    {kicker: 'KONTEKST', old: 'szukasz', next: 'gotowy', note: 'AI widzi rozmowę i zasady marki'},
+    {kicker: 'WYSYŁKA', old: 'automat', next: 'po akceptacji', note: 'ostatnie słowo zawsze należy do Ciebie'},
   ];
 
   return (
-    <div style={{position: 'absolute', inset: 0, padding: '130px 68px 330px', boxSizing: 'border-box', opacity: fade(frame, 432, 518)}}>
-      <div style={{opacity: p1}}><Brand /></div>
-      <div style={{fontSize: 72, lineHeight: 1.0, fontWeight: 970, letterSpacing: -4, marginTop: 55, opacity: p2}}>
-        Szybciej, ale nadal
-        <br />
-        po Twojemu.
+    <PageShell dark>
+      <div style={{position: 'absolute', inset: 0, padding: '92px 60px 120px', opacity: sceneOpacity(frame, 405, 555)}}>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: p1}}><Logo light /><span style={{fontSize: 18, color: '#797f8d', fontWeight: 650}}>03 / 04</span></div>
+        <div style={{marginTop: 92, opacity: p2}}>
+          <div style={{fontSize: 27, color: '#858b98', fontWeight: 760}}>NIE CHODZI O „WIĘCEJ AI”.</div>
+          <div style={{fontSize: 86, lineHeight: .96, fontWeight: 920, letterSpacing: -5, marginTop: 15}}>CHODZI O TO,
+            <br />ŻEBY NIE TRACIĆ
+            <br /><span style={{color: '#6f8cff'}}>GORĄCEGO LEADA.</span></div>
+        </div>
+
+        <div style={{display: 'flex', flexDirection: 'column', gap: 14, marginTop: 68}}>
+          {cards.map((card, i) => {
+            const p = i === 0 ? p2 : i === 1 ? p3 : p4;
+            return (
+              <div key={card.kicker} style={{display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 24, padding: '24px 25px', borderRadius: 22, background: '#12151d', border: '1px solid #242934', opacity: p, transform: `translateY(${interpolate(p, [0, 1], [16, 0])}px)`}}>
+                <div>
+                  <div style={{fontSize: 14, color: '#777e8c', fontWeight: 850, letterSpacing: .7}}>{card.kicker}</div>
+                  <div style={{display: 'flex', alignItems: 'baseline', gap: 13, marginTop: 8}}><span style={{fontSize: 29, color: '#707784', textDecoration: 'line-through'}}>{card.old}</span><span style={{fontSize: 40, fontWeight: 900, color: '#fff'}}>{card.next}</span></div>
+                </div>
+                <div style={{fontSize: 20, lineHeight: 1.35, color: '#b8bdc7', display: 'flex', alignItems: 'center'}}>{card.note}</div>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <div style={{display: 'flex', flexDirection: 'column', gap: 18, marginTop: 55, opacity: p3}}>
-        {rows.map(([n, title, detail], idx) => (
-          <div key={n} style={{display: 'grid', gridTemplateColumns: '78px 1fr', gap: 22, alignItems: 'center', padding: '23px 26px', borderRadius: 28, background: idx === 1 ? 'rgba(79,124,255,.12)' : C.panel, border: idx === 1 ? '1px solid rgba(79,124,255,.35)' : '1px solid rgba(255,255,255,.07)'}}>
-            <div style={{fontSize: 28, color: idx === 1 ? C.cyan : C.muted, fontWeight: 950}}>{n}</div>
-            <div>
-              <div style={{fontSize: 34, fontWeight: 930}}>{title}</div>
-              <div style={{fontSize: 25, color: C.muted, marginTop: 3}}>{detail}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    </PageShell>
   );
 };
 
 const CtaScene: React.FC<{frame: number}> = ({frame}) => {
   const {fps} = useVideoConfig();
-  const local = frame - 510;
+  const local = frame - 535;
   const p1 = appear(local, fps, 0);
-  const p2 = appear(local, fps, 10);
-  const p3 = appear(local, fps, 24);
-  const glow = 0.65 + 0.35 * Math.sin(local / 8);
+  const p2 = appear(local, fps, 12);
+  const p3 = appear(local, fps, 26);
+  const glow = 0.5 + 0.5 * Math.sin(local / 10);
 
   return (
-    <div style={{position: 'absolute', inset: 0, padding: '135px 74px 330px', boxSizing: 'border-box', opacity: fade(frame, 508, 600)}}>
-      <div style={{opacity: p1}}><Brand /></div>
-      <div style={{marginTop: 118, fontSize: 44, color: C.muted, fontWeight: 850, opacity: p2}}>CHCESZ ZOBACZYĆ TO NA SWOIM BIZNESIE?</div>
-      <div style={{fontSize: 108, lineHeight: 0.92, fontWeight: 990, letterSpacing: -7, marginTop: 24, opacity: p2}}>
-        NAPISZ
-        <br />
-        <span style={{color: C.cyan}}>„FLOW”</span>
-      </div>
-      <div style={{fontSize: 44, lineHeight: 1.08, fontWeight: 820, color: C.white, marginTop: 35, opacity: p3}}>
-        i pokażę Ci demo procesu
-        <br />
-        krok po kroku.
-      </div>
+    <PageShell>
+      <div style={{position: 'absolute', inset: 0, padding: '92px 62px 115px', opacity: sceneOpacity(frame, 530, 660)}}>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: p1}}><Logo /><span style={{fontSize: 18, color: '#a0a4ad', fontWeight: 650}}>04 / 04</span></div>
+        <div style={{marginTop: 160, opacity: p2}}>
+          <div style={{fontSize: 31, color: C.sub, fontWeight: 760}}>ZOBACZ TO NA SWOICH WIADOMOŚCIACH.</div>
+          <div style={{fontSize: 104, lineHeight: .93, fontWeight: 930, letterSpacing: -6, marginTop: 20}}>NAPISZ
+            <br /><span style={{color: C.blue}}>FLOW.</span></div>
+          <div style={{fontSize: 32, lineHeight: 1.28, color: '#4d515a', fontWeight: 650, marginTop: 35, maxWidth: 820}}>Pokażemy Ci, jak FlowPilot może obsługiwać Messenger i Instagram w Twojej firmie — zanim kupisz.</div>
+        </div>
 
-      <div
-        style={{
-          marginTop: 70,
-          padding: '30px 34px',
-          borderRadius: 30,
-          background: C.white,
-          color: '#07101f',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: 38,
-          fontWeight: 960,
-          opacity: p3,
-          transform: `scale(${interpolate(p3, [0, 1], [0.93, 1])})`,
-          boxShadow: `0 0 ${50 + 30 * glow}px rgba(85,216,255,.18)`,
-        }}
-      >
-        <span>Wyślij: FLOW</span>
-        <span style={{fontSize: 50}}>→</span>
+        <div style={{marginTop: 70, display: 'flex', gap: 14, opacity: p3}}>
+          <div style={{flex: 1, height: 92, borderRadius: 21, background: '#fff', border: `1px solid ${C.line}`, display: 'flex', alignItems: 'center', padding: '0 24px', fontSize: 27, color: '#8b909a', boxShadow: '0 18px 55px rgba(30,35,50,.08)'}}>Napisz wiadomość…</div>
+          <div style={{width: 180, height: 92, borderRadius: 21, background: C.blue, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 27, fontWeight: 850, boxShadow: `0 18px ${45 + glow * 20}px rgba(51,92,255,.28)`}}>FLOW →</div>
+        </div>
+
+        <div style={{position: 'absolute', left: 62, right: 62, bottom: 112, display: 'flex', alignItems: 'center', gap: 12, color: '#7d828c', fontSize: 19, fontWeight: 650, opacity: p3}}>
+          <span style={{width: 8, height: 8, borderRadius: 99, background: C.green}} /> Demo • bez zobowiązań • konkretny proces dla Twojej firmy
+        </div>
       </div>
+    </PageShell>
+  );
+};
+
+const Caption: React.FC<{frame: number}> = ({frame}) => {
+  const items = [
+    {from: 10, to: 74, text: 'Klient napisał właśnie teraz.'},
+    {from: 74, to: 142, text: 'Ty odpiszesz za godzinę?'},
+    {from: 142, to: 235, text: 'W tym czasie może już kupić u konkurencji.'},
+    {from: 235, to: 332, text: 'FlowPilot czyta wiadomość i przygotowuje odpowiedź.'},
+    {from: 332, to: 409, text: 'Ty sprawdzasz. Zatwierdzasz. Gotowe.'},
+    {from: 409, to: 515, text: 'Szybciej odpowiadasz. Mniej leadów przepada.'},
+    {from: 515, to: 645, text: 'Chcesz zobaczyć demo? Napisz: FLOW.'},
+  ];
+  const current = items.find((x) => frame >= x.from && frame < x.to);
+  if (!current) return null;
+  const local = frame - current.from;
+  const p = interpolate(local, [0, 6], [0, 1], clamp);
+  return (
+    <div style={{position: 'absolute', left: 60, right: 60, bottom: 210, display: 'flex', justifyContent: 'center', zIndex: 80, pointerEvents: 'none', opacity: p, transform: `translateY(${interpolate(p, [0, 1], [12, 0])}px)`}}>
+      <div style={{padding: '13px 19px', borderRadius: 14, background: 'rgba(8,10,14,.88)', color: '#fff', fontSize: 30, lineHeight: 1.16, fontWeight: 800, textAlign: 'center', boxShadow: '0 12px 40px rgba(0,0,0,.16)'}}>{current.text}</div>
     </div>
   );
 };
@@ -432,27 +442,20 @@ export const FlowPilotAdFinal: React.FC = () => {
   const frame = useCurrentFrame();
 
   return (
-    <Shell frame={frame}>
-      <Audio src={staticFile('audio/bed.wav')} volume={0.10} />
-      <Sequence from={9}>
+    <AbsoluteFill>
+      <Audio src={staticFile('audio/bed.wav')} volume={0.055} />
+      <Sequence from={8}>
         <Audio src={VOICEOVER} volume={1} />
       </Sequence>
-      <Sequence from={7} durationInFrames={18}>
-        <Audio src={staticFile('audio/notif.wav')} volume={0.85} />
-      </Sequence>
-      <Sequence from={365} durationInFrames={12}>
-        <Audio src={staticFile('audio/click.wav')} volume={0.8} />
-      </Sequence>
-      <Sequence from={395} durationInFrames={20}>
-        <Audio src={staticFile('audio/success.wav')} volume={0.75} />
-      </Sequence>
+      <Sequence from={10} durationInFrames={22}><Audio src={staticFile('audio/notif.wav')} volume={0.52} /></Sequence>
+      <Sequence from={265} durationInFrames={12}><Audio src={staticFile('audio/click.wav')} volume={0.34} /></Sequence>
+      <Sequence from={292} durationInFrames={20}><Audio src={staticFile('audio/success.wav')} volume={0.34} /></Sequence>
 
-      <HookScene frame={frame} />
-      <DraftScene frame={frame} />
-      <ApprovalScene frame={frame} />
-      <ResultScene frame={frame} />
-      <CtaScene frame={frame} />
-      <CaptionRail frame={frame} />
-    </Shell>
+      {frame < 135 ? <HookScene frame={frame} /> : null}
+      {frame >= 110 && frame < 430 ? <ProductScene frame={frame} /> : null}
+      {frame >= 405 && frame < 555 ? <ResultScene frame={frame} /> : null}
+      {frame >= 530 ? <CtaScene frame={frame} /> : null}
+      <Caption frame={frame} />
+    </AbsoluteFill>
   );
 };
