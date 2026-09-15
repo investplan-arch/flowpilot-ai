@@ -98,7 +98,7 @@
   <div class="modalCard">
     <div class="modalIcon">F</div>
     <h2>Połącz panel operatora</h2>
-    <p>Wpisz klucz operatora. Zostanie zapisany wyłącznie w tej karcie przeglądarki.</p>
+    <p>Wpisz klucz operatora. Zostanie zapisany wyłącznie na tym urządzeniu.</p>
     <input id="operatorKey" type="password" placeholder="Klucz operatora" autocomplete="current-password">
     <div id="authError" class="error"></div>
     <div class="modalActions"><button class="btn ghost" id="authCancel">Anuluj</button><button class="btn primary" id="authConnect">Połącz</button></div>
@@ -106,6 +106,9 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<script>
+(()=>{const n='flowpilot_operator_key';const s=sessionStorage.getItem(n)||'';const l=localStorage.getItem(n)||'';if(s&&!l)localStorage.setItem(n,s);if(!s&&l)sessionStorage.setItem(n,l);})();
+</script>
 <script src="app.js"></script>
 </body>
 </html>
