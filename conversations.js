@@ -1,0 +1,1 @@
+window.DOTACJAPLUS_CRM = {"version":1,"clients":{"29168943666030629":{"messenger_id":"29168943666030629","ostatnia_wiadomosc_klienta":".","ostatni_szkic_ai":"Dzień dobry, w czym mogę pomóc? Proszę krótko opisać planowaną inwestycję oraz napisać, czy działalność jest już prowadzona, czy dopiero planuje ją Pan, Pani lub Państwo rozpocząć."}}};
