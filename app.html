@@ -5,52 +5,26 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0f14">
 <title>FlowPilot | DotacjaPlus</title>
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="app.css?v=20260915c">
 </head>
-<body>
+<body data-theme="hybrid">
 <div class="appShell">
   <aside class="sidebar">
-    <div class="brandBlock">
-      <div class="brandMark">F</div>
-      <div class="brandText"><strong>FlowPilot</strong><span>Operator Console</span></div>
-    </div>
-
-    <div class="workspaceCard">
-      <span class="workspaceEyebrow">Workspace</span>
-      <div class="workspaceRow"><span class="workspaceLogo">D+</span><div><strong>DotacjaPlus</strong><small>Obsługa klientów</small></div></div>
-    </div>
-
+    <div class="brandBlock"><div class="brandMark">F</div><div class="brandText"><strong>FlowPilot</strong><span>Operator Console</span></div></div>
+    <div class="workspaceCard"><span class="workspaceEyebrow">Workspace</span><div class="workspaceRow"><span class="workspaceLogo">D+</span><div><strong>DotacjaPlus</strong><small>Obsługa klientów</small></div></div></div>
     <nav class="nav" aria-label="Główna nawigacja">
-      <button class="on" data-v="d" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/></svg><span>Dashboard</span>
-      </button>
-      <button data-v="i" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5Zm3 4h10v2H7V9Zm0 4h7v2H7v-2Z"/></svg><span>AI Inbox</span><span class="navCount" id="navPending">0</span>
-      </button>
-      <button data-v="l" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"/></svg><span>CRM</span>
-      </button>
-      <button data-v="u" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm9 4-2.1 1.2.1 1.3 1.8 1.6-2 3.4-2.4-.8-1 .8-.4 2.5h-4l-.4-2.5-1-.8-2.4.8-2-3.4L5 14.5l.1-1.3L3 12l2.1-1.2L5 9.5 3.2 7.9l2-3.4 2.4.8 1-.8L9 2h4l.4 2.5 1 .8 2.4-.8 2 3.4L17 9.5l.1 1.3L21 12Z"/></svg><span>System</span>
-      </button>
+      <button class="on" data-v="d" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/></svg><span>Dashboard</span></button>
+      <button data-v="i" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5Zm3 4h10v2H7V9Zm0 4h7v2H7v-2Z"/></svg><span>AI Inbox</span><span class="navCount" id="navPending">0</span></button>
+      <button data-v="l" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"/></svg><span>CRM</span></button>
+      <button data-v="u" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm9 4-2.1 1.2.1 1.3 1.8 1.6-2 3.4-2.4-.8-1 .8-.4 2.5h-4l-.4-2.5-1-.8-2.4.8-2-3.4L5 14.5l.1-1.3L3 12l2.1-1.2L5 9.5 3.2 7.9l2-3.4 2.4.8 1-.8L9 2h4l.4 2.5 1 .8 2.4-.8 2 3.4L17 9.5l.1 1.3L21 12Z"/></svg><span>System</span></button>
     </nav>
-
-    <div class="sidebarBottom">
-      <div class="connectionLine"><span class="dot" id="sideDot"></span><div><strong id="sideState">Rozłączono</strong><small id="sideMeta">Backend niedostępny</small></div></div>
-      <div class="operatorRow"><span class="avatar small">DS</span><div><strong>Operator</strong><small>DotacjaPlus</small></div></div>
-    </div>
+    <div class="sidebarBottom"><div class="connectionLine"><span class="dot" id="sideDot"></span><div><strong id="sideState">Rozłączono</strong><small id="sideMeta">Backend niedostępny</small></div></div><div class="operatorRow"><span class="avatar small">DS</span><div><strong>Operator</strong><small>DotacjaPlus</small></div></div></div>
   </aside>
 
   <main class="main">
     <header class="topbar">
       <div class="pageTitle"><span class="eyebrow">FlowPilot / DotacjaPlus</span><h1 id="t">Dashboard</h1><p id="sub">Najważniejsze sprawy i stan obsługi.</p></div>
-      <div class="topActions">
-        <div class="livePill" id="connectionPill"><span class="dot" id="topDot"></span><span id="topState">Offline</span></div>
-        <button class="iconBtn" id="refresh" type="button" aria-label="Odśwież dane" title="Odśwież" disabled>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66L20 8.68V4h-2v1.76A10 10 0 1 0 22 12h-2Z"/></svg>
-        </button>
-        <button class="btn secondary" id="connect" type="button">Połącz panel</button>
-      </div>
+      <div class="topActions"><button class="appearanceBtn" type="button" data-jump="u" title="Zmień wygląd"><span class="appearanceSwatch"></span>Wygląd</button><div class="livePill" id="connectionPill"><span class="dot" id="topDot"></span><span id="topState">Offline</span></div><button class="iconBtn" id="refresh" type="button" aria-label="Odśwież dane" title="Odśwież" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66L20 8.68V4h-2v1.76A10 10 0 1 0 22 12h-2Z"/></svg></button><button class="btn secondary" id="connect" type="button">Połącz panel</button></div>
     </header>
 
     <section class="view on" id="d">
@@ -60,107 +34,34 @@
         <article class="metricCard"><div class="metricTop"><span>Wiadomości</span><span class="metricIcon slate">#</span></div><strong id="msgCount">0</strong><p>rekordów rozmów zapisanych prywatnie</p></article>
         <article class="metricCard"><div class="metricTop"><span>System</span><span class="metricIcon green">✓</span></div><strong class="health" id="healthState">OFF</strong><p id="healthMeta">Brak połączenia z backendem</p></article>
       </div>
-
       <div class="dashboardGrid">
-        <article class="panel queuePanel">
-          <div class="panelHead"><div><span class="sectionEyebrow">Priorytet</span><h2>Do obsłużenia</h2><p>Najświeższe wiadomości wymagające decyzji.</p></div><button class="textBtn" type="button" data-jump="i">Otwórz Inbox</button></div>
-          <div id="queueList" class="activityList"><div class="emptyState">Połącz panel, aby zobaczyć kolejkę.</div></div>
-        </article>
-
-        <article class="panel activityPanel">
-          <div class="panelHead"><div><span class="sectionEyebrow">Aktywność</span><h2>Ostatnie zdarzenia</h2><p>Najnowsze rozmowy i leady.</p></div></div>
-          <div id="recentList" class="activityList"><div class="emptyState">Brak danych do wyświetlenia.</div></div>
-        </article>
+        <article class="panel queuePanel"><div class="panelHead"><div><span class="sectionEyebrow">Priorytet</span><h2>Do obsłużenia</h2><p>Najświeższe wiadomości wymagające decyzji.</p></div><button class="textBtn" type="button" data-jump="i">Otwórz Inbox</button></div><div id="queueList" class="activityList"><div class="emptyState">Połącz panel, aby zobaczyć kolejkę.</div></div></article>
+        <article class="panel activityPanel"><div class="panelHead"><div><span class="sectionEyebrow">Aktywność</span><h2>Ostatnie zdarzenia</h2><p>Najnowsze rozmowy i leady.</p></div></div><div id="recentList" class="activityList"><div class="emptyState">Brak danych do wyświetlenia.</div></div></article>
       </div>
-
-      <article class="panel flowPanel">
-        <div class="panelHead"><div><span class="sectionEyebrow">Automatyzacja</span><h2>Ścieżka obsługi</h2><p>Każda odpowiedź przechodzi przez operatora przed wysłaniem.</p></div><span class="statusTag success">Produkcja</span></div>
-        <div class="flowSteps">
-          <div class="flowStep"><span>1</span><div><strong>Messenger</strong><small>Odbiór wiadomości</small></div></div>
-          <div class="flowArrow">→</div>
-          <div class="flowStep"><span>2</span><div><strong>AI</strong><small>Szkic odpowiedzi</small></div></div>
-          <div class="flowArrow">→</div>
-          <div class="flowStep"><span>3</span><div><strong>CRM</strong><small>Pamięć klienta</small></div></div>
-          <div class="flowArrow">→</div>
-          <div class="flowStep"><span>4</span><div><strong>Operator</strong><small>Decyzja i wysyłka</small></div></div>
-        </div>
-      </article>
+      <article class="panel flowPanel"><div class="panelHead"><div><span class="sectionEyebrow">Automatyzacja</span><h2>Ścieżka obsługi</h2><p>Każda odpowiedź przechodzi przez operatora przed wysłaniem.</p></div><span class="statusTag success">Produkcja</span></div><div class="flowSteps"><div class="flowStep"><span>1</span><div><strong>Messenger</strong><small>Odbiór wiadomości</small></div></div><div class="flowArrow">→</div><div class="flowStep"><span>2</span><div><strong>AI</strong><small>Szkic odpowiedzi</small></div></div><div class="flowArrow">→</div><div class="flowStep"><span>3</span><div><strong>CRM</strong><small>Pamięć klienta</small></div></div><div class="flowArrow">→</div><div class="flowStep"><span>4</span><div><strong>Operator</strong><small>Decyzja i wysyłka</small></div></div></div></article>
     </section>
 
     <section class="view" id="i">
       <div class="inboxLayout">
-        <aside class="panel inboxSidebar">
-          <div class="panelHead compact"><div><h2>Rozmowy</h2><p id="inboxMeta">0 wiadomości</p></div></div>
-          <div class="searchBox">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 20-4.3-4.3a7 7 0 1 0-1.4 1.4L18.6 21 20 20ZM5 11a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z"/></svg>
-            <input id="inboxSearch" type="search" placeholder="Szukaj rozmowy" autocomplete="off">
-          </div>
-          <div class="segmented" id="inboxFilters">
-            <button class="on" type="button" data-filter="pending">Do akceptacji</button>
-            <button type="button" data-filter="all">Wszystkie</button>
-            <button type="button" data-filter="done">Zakończone</button>
-          </div>
-          <div id="conversationList" class="conversationList"><div class="emptyState">Brak rozmów.</div></div>
-        </aside>
-
+        <aside class="panel inboxSidebar"><div class="panelHead compact"><div><h2>Rozmowy</h2><p id="inboxMeta">0 wiadomości</p></div></div><div class="searchBox"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 20-4.3-4.3a7 7 0 1 0-1.4 1.4L18.6 21 20 20ZM5 11a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z"/></svg><input id="inboxSearch" type="search" placeholder="Szukaj rozmowy" autocomplete="off"></div><div class="segmented" id="inboxFilters"><button class="on" type="button" data-filter="pending">Do akceptacji</button><button type="button" data-filter="all">Wszystkie</button><button type="button" data-filter="done">Zakończone</button></div><div id="conversationList" class="conversationList"><div class="emptyState">Brak rozmów.</div></div></aside>
         <section class="conversationWorkspace">
-          <article class="panel editorPanel">
-            <div class="conversationHead">
-              <div class="identity"><span class="avatar" id="contactAvatar">K</span><div><h2 id="who">Wybierz rozmowę</h2><p id="leadMeta">Szczegóły kontaktu pojawią się tutaj.</p></div></div>
-              <span id="decisionBadge" class="statusTag neutral">Brak</span>
-            </div>
-
-            <div class="threadBlock">
-              <div class="threadLabel"><span>Wiadomość klienta</span><span id="messageTime"></span></div>
-              <div class="clientBubble" id="clientMessage">Brak wybranej wiadomości.</div>
-            </div>
-
-            <div class="draftBlock">
-              <div class="draftHead"><div><span class="draftLabel">Szkic odpowiedzi</span><small>Możesz edytować treść przed wysłaniem.</small></div><span class="aiBadge">AI</span></div>
-              <textarea id="reply" placeholder="Szkic odpowiedzi" disabled></textarea>
-              <div class="composerFooter"><span id="charCount">0 znaków</span><span>Wysyłka wymaga akceptacji</span></div>
-            </div>
-
-            <div class="actionBar">
-              <button class="btn secondary" id="regenerate" type="button" disabled>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.7 6.3A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.76-4.24L14 10h6V4l-2.3 2.3Z"/></svg>Popraw AI
-              </button>
-              <div class="actionBarRight">
-                <button class="btn dangerGhost" id="reject" type="button" disabled>Odrzuć</button>
-                <button class="btn primary" id="send" type="button" disabled>Wyślij do klienta</button>
-              </div>
-            </div>
-            <div id="actionState" class="actionState"></div>
-          </article>
-
-          <aside class="panel contextPanel">
-            <div class="panelHead compact"><div><span class="sectionEyebrow">CRM</span><h2>Kontekst klienta</h2><p>Aktualne dane z rozmowy.</p></div></div>
-            <div id="cardDetails" class="details"><div class="emptyState small">Wybierz rozmowę.</div></div>
-          </aside>
+          <article class="panel editorPanel"><div class="conversationHead"><div class="identity"><span class="avatar" id="contactAvatar">K</span><div><h2 id="who">Wybierz rozmowę</h2><p id="leadMeta">Szczegóły kontaktu pojawią się tutaj.</p></div></div><span id="decisionBadge" class="statusTag neutral">Brak</span></div><div class="threadBlock"><div class="threadLabel"><span>Wiadomość klienta</span><span id="messageTime"></span></div><div class="clientBubble" id="clientMessage">Brak wybranej wiadomości.</div></div><div class="draftBlock"><div class="draftHead"><div><span class="draftLabel">Szkic odpowiedzi</span><small>Możesz edytować treść przed wysłaniem.</small></div><span class="aiBadge">AI</span></div><textarea id="reply" placeholder="Szkic odpowiedzi" disabled></textarea><div class="composerFooter"><span id="charCount">0 znaków</span><span>Wysyłka wymaga akceptacji</span></div></div><div class="actionBar"><button class="btn secondary" id="regenerate" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.7 6.3A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.76-4.24L14 10h6V4l-2.3 2.3Z"/></svg>Popraw AI</button><div class="actionBarRight"><button class="btn dangerGhost" id="reject" type="button" disabled>Odrzuć</button><button class="btn primary" id="send" type="button" disabled>Wyślij do klienta</button></div></div><div id="actionState" class="actionState"></div></article>
+          <aside class="panel contextPanel"><div class="panelHead compact"><div><span class="sectionEyebrow">CRM</span><h2>Kontekst klienta</h2><p>Aktualne dane z rozmowy.</p></div></div><div id="cardDetails" class="details"><div class="emptyState small">Wybierz rozmowę.</div></div></aside>
         </section>
       </div>
     </section>
 
-    <section class="view" id="l">
-      <article class="panel crmPanel">
-        <div class="crmToolbar">
-          <div><span class="sectionEyebrow">Baza klientów</span><h2>Karty klientów</h2><p id="crmMeta">Ostatnia znana wersja danych z rozmów.</p></div>
-          <div class="searchBox wide">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 20-4.3-4.3a7 7 0 1 0-1.4 1.4L18.6 21 20 20ZM5 11a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z"/></svg>
-            <input id="crmSearch" type="search" placeholder="Szukaj po kliencie, mieście lub branży" autocomplete="off">
-          </div>
-        </div>
-        <div class="tableWrap">
-          <table>
-            <thead><tr><th>Klient</th><th>Profil</th><th>Inwestycja</th><th>Status</th><th>Następny krok</th><th></th></tr></thead>
-            <tbody id="crmRows"><tr><td colspan="6"><div class="emptyState">Połącz panel, aby wczytać CRM.</div></td></tr></tbody>
-          </table>
-        </div>
-      </article>
-    </section>
+    <section class="view" id="l"><article class="panel crmPanel"><div class="crmToolbar"><div><span class="sectionEyebrow">Baza klientów</span><h2>Karty klientów</h2><p id="crmMeta">Ostatnia znana wersja danych z rozmów.</p></div><div class="searchBox wide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 20-4.3-4.3a7 7 0 1 0-1.4 1.4L18.6 21 20 20ZM5 11a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z"/></svg><input id="crmSearch" type="search" placeholder="Szukaj po kliencie, mieście lub branży" autocomplete="off"></div></div><div class="tableWrap"><table><thead><tr><th>Klient</th><th>Profil</th><th>Inwestycja</th><th>Status</th><th>Następny krok</th><th></th></tr></thead><tbody id="crmRows"><tr><td colspan="6"><div class="emptyState">Połącz panel, aby wczytać CRM.</div></td></tr></tbody></table></div></article></section>
 
     <section class="view" id="u">
-      <div class="systemHeader"><div><span class="sectionEyebrow">Status usług</span><h2>System produkcyjny</h2><p>Stan kluczowych elementów FlowPilot.</p></div></div>
+      <div class="systemHeader"><div><span class="sectionEyebrow">Personalizacja</span><h2>Wygląd panelu</h2><p>Ten sam FlowPilot, cztery różne kierunki interfejsu. Zmiana zapisuje się na tym urządzeniu.</p></div></div>
+      <div class="themeGrid" id="themeGrid">
+        <button class="themeCard selected" type="button" data-theme-choice="hybrid"><span class="themePreview hybridPreview"><i></i><i></i><i></i></span><span class="themeText"><strong>FlowPilot Hybrid</strong><small>Front + Intercom + Attio + Linear</small></span><span class="themeCheck">✓</span></button>
+        <button class="themeCard" type="button" data-theme-choice="linear"><span class="themePreview linearPreview"><i></i><i></i><i></i></span><span class="themeText"><strong>Linear Dark</strong><small>Gęsty, techniczny, premium</small></span><span class="themeCheck">✓</span></button>
+        <button class="themeCard" type="button" data-theme-choice="attio"><span class="themePreview attioPreview"><i></i><i></i><i></i></span><span class="themeText"><strong>Attio Light</strong><small>CRM-first, jasny i spokojny</small></span><span class="themeCheck">✓</span></button>
+        <button class="themeCard" type="button" data-theme-choice="front"><span class="themePreview frontPreview"><i></i><i></i><i></i></span><span class="themeText"><strong>Front Inbox</strong><small>Obsługa rozmów na pierwszym planie</small></span><span class="themeCheck">✓</span></button>
+      </div>
+      <div class="systemHeader servicesTitle"><div><span class="sectionEyebrow">Status usług</span><h2>System produkcyjny</h2><p>Stan kluczowych elementów FlowPilot.</p></div></div>
       <div class="systemGrid">
         <article class="serviceCard"><div class="serviceTop"><span class="serviceIcon">M</span><span class="statusTag success">Aktywne</span></div><h3>Messenger Intake</h3><p>Odbiór wiadomości, deduplikacja MID i przypisanie do klienta.</p><div class="serviceMeta"><span>Make</span><strong>Webhook live</strong></div></article>
         <article class="serviceCard"><div class="serviceTop"><span class="serviceIcon">AI</span><span class="statusTag success">Aktywne</span></div><h3>AI Drafting</h3><p>Szkic odpowiedzi korzysta z historii klienta i wymaga ręcznej akceptacji.</p><div class="serviceMeta"><span>OpenAI</span><strong>Human approval</strong></div></article>
@@ -171,29 +72,15 @@
   </main>
 </div>
 
-<div class="modal" id="auth" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-  <div class="modalCard">
-    <div class="modalHeader"><div class="modalIcon">F</div><button class="modalClose" id="authCancel" type="button" aria-label="Zamknij">×</button></div>
-    <h2 id="authTitle">Połącz panel</h2>
-    <p>Klucz operatora jest przechowywany lokalnie na tym urządzeniu.</p>
-    <label class="fieldLabel" for="operatorKey">Klucz operatora</label>
-    <input id="operatorKey" type="password" placeholder="Wklej klucz" autocomplete="current-password">
-    <div id="authError" class="error"></div>
-    <div class="modalActions"><button class="btn primary full" id="authConnect" type="button">Połącz z backendem</button></div>
-  </div>
-</div>
-
-<div class="modal" id="decisionModal" role="dialog" aria-modal="true" aria-labelledby="decisionTitle">
-  <div class="modalCard decisionCard">
-    <div class="modalHeader"><div class="confirmIcon" id="decisionIcon">→</div><button class="modalClose" id="decisionCancel" type="button" aria-label="Zamknij">×</button></div>
-    <h2 id="decisionTitle">Wyślij wiadomość?</h2>
-    <p id="decisionText">Sprawdź treść przed wysłaniem do klienta.</p>
-    <div class="messagePreview" id="decisionPreview"></div>
-    <div class="modalActions split"><button class="btn secondary" id="decisionBack" type="button">Wróć</button><button class="btn primary" id="decisionConfirm" type="button">Wyślij</button></div>
-  </div>
-</div>
-
+<div class="modal" id="auth" role="dialog" aria-modal="true" aria-labelledby="authTitle"><div class="modalCard"><div class="modalHeader"><div class="modalIcon">F</div><button class="modalClose" id="authCancel" type="button" aria-label="Zamknij">×</button></div><h2 id="authTitle">Połącz panel operatora</h2><p>Klucz operatora zostanie zapamiętany tylko na tym urządzeniu.</p><label class="fieldLabel" for="operatorKey">Klucz operatora</label><input id="operatorKey" type="password" placeholder="Wklej klucz" autocomplete="current-password"><div id="authError" class="error"></div><div class="modalActions"><button class="btn primary full" id="authConnect" type="button">Połącz z backendem</button></div></div></div>
+<div class="modal" id="decisionModal" role="dialog" aria-modal="true" aria-labelledby="decisionTitle"><div class="modalCard decisionCard"><div class="modalHeader"><div class="confirmIcon" id="decisionIcon">→</div><button class="modalClose" id="decisionCancel" type="button" aria-label="Zamknij">×</button></div><h2 id="decisionTitle">Wyślij wiadomość?</h2><p id="decisionText">Sprawdź treść przed wysłaniem do klienta.</p><div class="messagePreview" id="decisionPreview"></div><div class="modalActions split"><button class="btn secondary" id="decisionBack" type="button">Wróć</button><button class="btn primary" id="decisionConfirm" type="button">Wyślij</button></div></div></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="app.js"></script>
+<script>
+(()=>{const k='flowpilot_operator_key';const s=sessionStorage.getItem(k)||'';const l=localStorage.getItem(k)||'';if(s&&!l)localStorage.setItem(k,s);if(!s&&l)sessionStorage.setItem(k,l);const theme=localStorage.getItem('flowpilot_theme')||'hybrid';document.body.dataset.theme=theme;})();
+</script>
+<script src="app.js?v=20260915c"></script>
+<script>
+(()=>{const meta=document.querySelector('meta[name="theme-color"]');const colors={hybrid:'#0b0f14',linear:'#0d0d12',attio:'#f6f7f9',front:'#f4f7fb'};function applyTheme(theme){document.body.dataset.theme=theme;localStorage.setItem('flowpilot_theme',theme);document.querySelectorAll('[data-theme-choice]').forEach(el=>el.classList.toggle('selected',el.dataset.themeChoice===theme));if(meta)meta.setAttribute('content',colors[theme]||colors.hybrid)}document.querySelectorAll('[data-theme-choice]').forEach(el=>el.addEventListener('click',()=>applyTheme(el.dataset.themeChoice)));applyTheme(document.body.dataset.theme||'hybrid');})();
+</script>
 </body>
 </html>
