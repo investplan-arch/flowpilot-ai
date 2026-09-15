@@ -1,193 +1,111 @@
 <!doctype html>
+<html lang="pl">
+<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width">
-<title>FlowPilot App</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<title>FlowPilot AI | Panel operatora</title>
 <link rel="stylesheet" href="app.css">
-<div class="a">
-<aside>
-<h2>FlowPilot AI</h2>
-<div class="n">
-<button class="on" data-v="d">⌂ Dashboard</button>
-<button data-v="i">✦ AI Inbox</button>
-<button data-v="l">◎ Leady</button>
-<button data-v="u">⌁ Automatyzacje</button>
-<button data-v="s">⚙ Ustawienia</button>
-</div>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="brand"><span class="brandMark">F</span><div><b>FlowPilot AI</b><small>DotacjaPlus</small></div></div>
+  <nav class="nav">
+    <button class="on" data-v="d">Dashboard</button>
+    <button data-v="i">AI Inbox</button>
+    <button data-v="l">CRM</button>
+    <button data-v="u">System</button>
+  </nav>
+  <div class="sideFoot"><span class="dot" id="sideDot"></span><span id="sideState">Rozłączono</span></div>
 </aside>
 <main>
-<div class="top">
-<div>
-<h1 id="t">Dashboard</h1>
-<div class="m" id="sub">Przegląd sprzedaży</div>
-</div>
-<div class="topActions"><button class="btn" id="sync"><span class="status" id="syncState">Dane demo</span></button><button class="btn pri" id="nl">+ Nowy lead</button></div>
-</div>
-<section class="v on" id="d">
-<div class="stats">
-<div class="c">Nowe leady<b id="newCount">24</b>
-<span class="ok">+18%</span>
-</div>
-<div class="c">Do akceptacji<b id="approvalCount">3</b>
-<span>Wymagają decyzji</span>
-</div>
-<div class="c">Follow-up<b>7</b>
-<span>5 auto</span>
-</div>
-<div class="c">Konwersja<b>31%</b>
-<span class="ok">+6 p.p.</span>
-</div>
-</div>
-<div class="two">
-<div class="p" id="conversationList">
-<h3>AI Inbox</h3>
-<div class="it">
-<b>Marek Kowalski</b>
-<div class="m">92/100 · oddzwonić jutro</div>
-</div>
-<div class="it">
-<b>Anna Nowak</b>
-<div class="m">74/100 · prośba o ofertę</div>
-</div>
-</div>
-<div class="p">
-<h3>Aktywność AI</h3>
-<div class="it">✓ oceniono lead</div>
-<div class="it">↗ follow-up zaplanowany</div>
-<div class="it">◎ CRM zaktualizowany</div>
-</div>
-</div>
-</section>
-<section class="v" id="i">
-<div class="chat">
-<div class="p">
-<h3>Rozmowy</h3>
-<div class="cv on" data-n="Marek Kowalski">Marek Kowalski<div class="m">Messenger · 2 min</div>
-</div>
-<div class="cv" data-n="Anna Nowak">Anna Nowak<div class="m">Formularz · 8 min</div>
-</div>
-<div class="cv" data-n="Robert Lis">Robert Lis<div class="m">E-mail · 34 min</div>
-</div>
-</div>
-<div class="p">
-<h3 id="who">Marek Kowalski</h3>
-<div class="it" id="clientMessage">Klient: Możecie oddzwonić jutro po 14:00?</div>
-<p class="m" id="leadMeta">AI: demo/zakup · wysoki priorytet</p>
-<textarea id="r">Dzień dobry, możemy zadzwonić jutro o 14:30. Jeśli pasuje, zarezerwuję termin.</textarea>
-<p>
-<button class="btn" id="rg">↻ Ponownie</button> <button class="btn" id="rj">Odrzuć</button> <button class="btn pri" id="ap">✓ Zatwierdź</button>
-</p>
-<div id="ms" class="ok">
-</div>
-</div>
-</div>
-</section>
-<section class="v" id="l">
-<div class="p">
-<h3>Leady</h3>
-<table>
-<thead>
-<tr>
-<th>Lead</th>
-<th>Firma</th>
-<th>Score</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody id="rows">
-<tr>
-<td>Marek Kowalski</td>
-<td>NovaTech</td>
-<td>92</td>
-<td>Oferta</td>
-</tr>
-<tr>
-<td>Anna Nowak</td>
-<td>GreenPoint</td>
-<td>74</td>
-<td>Kontakt</td>
-</tr>
-<tr>
-<td>Robert Lis</td>
-<td>AlphaCom</td>
-<td>61</td>
-<td>Nowy</td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section class="v" id="u">
-<div class="auto">
-<div class="p">
-<b class="ok">AKTYWNA</b>
-<h3>Lead → AI → Akceptacja</h3>
-<p class="m">Webhook → scoring → odpowiedź → zatwierdzenie.</p>
-</div>
-<div class="p">
-<b class="ok">AKTYWNA</b>
-<h3>Follow-up 24h</h3>
-<p class="m">Brak odpowiedzi uruchamia kolejny kontakt.</p>
-</div>
-<div class="p">
-<b style="color:#f2b84b">OCZEKUJE NA META</b>
-<h3>Messenger → CRM</h3>
-<p class="m">Integracja gotowa do podłączenia po weryfikacji konta Meta.</p>
-<button class="btn" id="en" disabled>Weryfikacja wymagana</button>
-</div>
-</div>
-</section>
-<section class="v" id="s">
-<div class="two">
-<div class="p">
-<h3>Zachowanie AI</h3>
-<p>Ton<br>
-<select>
-<option>Profesjonalny</option>
-<option>Luźny</option>
-</select>
-</p>
-<p>Autonomia<br>
-<select>
-<option>Akceptacja przed wysyłką</option>
-<option>Auto proste pytania</option>
-</select>
-</p>
-<button class="btn pri" id="sv">Zapisz</button>
-<div id="saved" class="ok">
-</div>
-</div>
-<div class="p">
-<h3>Baza wiedzy</h3>
-<div class="it">✓ Oferta 2026</div>
-<div class="it">✓ FAQ</div>
-<div class="it">✓ Strona WWW</div>
-</div>
-<div class="p">
-<h3>Dane produkcyjne</h3>
-<div class="it" id="prodState">Tryb demonstracyjny</div>
-<button class="btn" id="connectData">Połącz panel</button>
-</div>
-</div>
-</section>
+  <header class="topbar">
+    <div><h1 id="t">Dashboard</h1><p id="sub">Operacyjne centrum DotacjaPlus</p></div>
+    <div class="topActions">
+      <button class="btn ghost" id="refresh" disabled>Odśwież</button>
+      <button class="btn primary" id="connect">Połącz panel</button>
+    </div>
+  </header>
+
+  <section class="view on" id="d">
+    <div class="stats">
+      <article class="stat"><span>Wiadomości</span><b id="msgCount">0</b><small>zapisane w prywatnym CRM</small></article>
+      <article class="stat"><span>Do akceptacji</span><b id="pendingCount">0</b><small>czekają na decyzję operatora</small></article>
+      <article class="stat"><span>Klienci</span><b id="clientCount">0</b><small>unikalne rozmowy</small></article>
+      <article class="stat"><span>Backend</span><b class="health" id="healthState">OFF</b><small id="healthMeta">brak połączenia</small></article>
+    </div>
+    <div class="grid2">
+      <article class="panel">
+        <div class="panelHead"><div><h3>Ostatnie wiadomości</h3><p>Najświeższe rekordy z Messengera</p></div></div>
+        <div id="recentList" class="list"><div class="empty">Połącz panel, aby wczytać dane.</div></div>
+      </article>
+      <article class="panel">
+        <div class="panelHead"><div><h3>Stan produkcyjny</h3><p>Aktualna ścieżka obsługi</p></div></div>
+        <div class="flow">
+          <div><span class="flowOk">1</span><b>Messenger</b><small>odbiór webhooka</small></div>
+          <div><span class="flowOk">2</span><b>AI</b><small>szkic odpowiedzi</small></div>
+          <div><span class="flowOk">3</span><b>CRM</b><small>event per wiadomość</small></div>
+          <div><span class="flowOk">4</span><b>Operator</b><small>akceptacja przed wysyłką</small></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="view" id="i">
+    <div class="inbox">
+      <article class="panel conversations">
+        <div class="panelHead"><div><h3>AI Inbox</h3><p id="inboxMeta">0 rozmów</p></div></div>
+        <div id="conversationList" class="list"><div class="empty">Brak danych.</div></div>
+      </article>
+      <article class="panel editor">
+        <div class="panelHead"><div><h3 id="who">Wybierz rozmowę</h3><p id="leadMeta">Szczegóły klienta pojawią się tutaj.</p></div><span id="decisionBadge" class="badge neutral">BRAK</span></div>
+        <div class="messageBox"><small>WIADOMOŚĆ KLIENTA</small><div id="clientMessage">Brak wybranej wiadomości.</div></div>
+        <label class="label" for="reply">SZKIC AI</label>
+        <textarea id="reply" placeholder="Szkic odpowiedzi" disabled></textarea>
+        <div class="actions">
+          <button class="btn ghost" id="regenerate" disabled>Popraw AI</button>
+          <button class="btn danger" id="reject" disabled>Odrzuć</button>
+          <button class="btn primary" id="send" disabled>Wyślij po akceptacji</button>
+        </div>
+        <div id="actionState" class="actionState"></div>
+        <div id="cardDetails" class="details"></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="view" id="l">
+    <article class="panel">
+      <div class="panelHead"><div><h3>Karty klientów</h3><p>Ostatnia znana wersja danych z rozmów</p></div></div>
+      <div class="tableWrap">
+        <table><thead><tr><th>Klient</th><th>Lokalizacja</th><th>Inwestycja</th><th>Status</th><th>Następny krok</th></tr></thead><tbody id="crmRows"><tr><td colspan="5" class="empty">Połącz panel, aby wczytać CRM.</td></tr></tbody></table>
+      </div>
+    </article>
+  </section>
+
+  <section class="view" id="u">
+    <div class="systemGrid">
+      <article class="panel"><span class="statusPill live">AKTYWNE</span><h3>Messenger → AI → CRM</h3><p>Każda tekstowa wiadomość klienta ma osobny rekord. Duplikaty MID są pomijane.</p></article>
+      <article class="panel"><span class="statusPill live">AKTYWNE</span><h3>Akceptacja operatora</h3><p>AI przygotowuje szkic. Wysłanie następuje dopiero po ręcznej decyzji.</p></article>
+      <article class="panel"><span class="statusPill live">AKTYWNE</span><h3>Prywatne dane</h3><p>Publiczny GitHub Pages nie przechowuje rozmów ani identyfikatorów klientów.</p></article>
+      <article class="panel"><span class="statusPill wait">ZEWNĘTRZNE</span><h3>Meta App Review</h3><p>Status weryfikacji Meta jest niezależny od panelu. FlowPilot nie zmienia go automatycznie.</p></article>
+    </div>
+  </section>
 </main>
 </div>
-<div class="modal" id="mo">
-<div class="box">
-<h3>Nowy lead</h3>
-<input id="nn" placeholder="Imię">
-<input id="cc" placeholder="Firma">
-<p>
-<button class="btn" id="x">Anuluj</button> <button class="btn pri" id="ad">Dodaj</button>
-</p>
-</div>
-</div>
+
 <div class="modal" id="auth">
-<div class="box">
-<h3>Połącz dane produkcyjne</h3>
-<p class="authHint">Wpisz klucz operatora. Klucz zostanie zapisany tylko w tej karcie przeglądarki.</p>
-<input id="operatorKey" type="password" placeholder="Klucz operatora" autocomplete="current-password">
-<div id="authError" class="bad"></div>
-<p><button class="btn" id="authCancel">Anuluj</button> <button class="btn pri" id="authConnect">Połącz</button></p>
+  <div class="modalCard">
+    <div class="modalIcon">F</div>
+    <h2>Połącz panel operatora</h2>
+    <p>Wpisz klucz operatora. Zostanie zapisany wyłącznie w tej karcie przeglądarki.</p>
+    <input id="operatorKey" type="password" placeholder="Klucz operatora" autocomplete="current-password">
+    <div id="authError" class="error"></div>
+    <div class="modalActions"><button class="btn ghost" id="authCancel">Anuluj</button><button class="btn primary" id="authConnect">Połącz</button></div>
+  </div>
 </div>
-</div>
+
+<div class="toast" id="toast"></div>
 <script src="app.js"></script>
+</body>
+</html>
