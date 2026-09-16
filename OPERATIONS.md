@@ -6,6 +6,7 @@ Stan: produkcyjne MVP DotacjaPlus, oczekuje na odblokowanie pełnego ruchu Messe
 
 - Landing: https://investplan-arch.github.io/flowpilot-ai/
 - Panel operatora: https://investplan-arch.github.io/flowpilot-ai/app.html
+- Pipeline: https://investplan-arch.github.io/flowpilot-ai/pipeline.html
 - Wejście do panelu: https://investplan-arch.github.io/flowpilot-ai/approval.html
 - Polityka prywatności: https://investplan-arch.github.io/flowpilot-ai/privacy.html
 - Usuwanie danych: https://investplan-arch.github.io/flowpilot-ai/data-deletion.html
@@ -26,10 +27,11 @@ W konfiguracji są dwa aktywne linki Stripe: opłata początkowa 1100 PLN oraz s
 4. Historia danego klienta jest pobierana z prywatnych rekordów CRM.
 5. AI przygotowuje szkic odpowiedzi i aktualizuje kartę CRM zgodnie z centralną konfiguracją.
 6. Każda wiadomość jest zapisywana jako osobny, niezmienny rekord CRM.
-7. Panel operatora pobiera rekordy, decyzje, ręczne aktualizacje CRM i leady WWW przez chroniony backend Make.
-8. Operator może poprawić szkic, odrzucić go albo zatwierdzić wysłanie.
-9. Dopiero po ręcznej akceptacji wiadomość jest wysyłana do Messengera.
-10. Po udanej wysyłce decyzja jest zapisywana w prywatnym CRM.
+7. Operator loguje się przez Supabase Auth. Przeglądarka wysyła ważny JWT do funkcji `dotacjaplus-ops`, która sprawdza konto i rolę, a dopiero potem po stronie serwera komunikuje się z backendem Make.
+8. Panel operatora pobiera rekordy, decyzje, ręczne aktualizacje CRM i leady WWW przez ten uwierzytelniony proxy.
+9. Operator może poprawić szkic, odrzucić go albo zatwierdzić wysłanie.
+10. Dopiero po ręcznej akceptacji wiadomość jest wysyłana do Messengera.
+11. Po udanej wysyłce decyzja jest zapisywana w prywatnym CRM.
 
 ## Aktywne scenariusze Make
 
@@ -63,7 +65,7 @@ Ręczne zmiany operatora są zapisywane jako osobne rekordy audytowe `dp-crm-upd
 
 `wspolpraca_potwierdzona && formularz_kompletny && (!platnosc_wymagana || platnosc_potwierdzona)`
 
-Panel pokazuje przeterminowane i dzisiejsze follow-upy w kolejce priorytetowej.
+Panel pokazuje przeterminowane i dzisiejsze follow-upy w kolejce priorytetowej. Pipeline Kanban korzysta z tej samej sesji użytkownika co panel główny. Zmiana etapu zapisuje aktualizację CRM, ale nie wysyła wiadomości do klienta.
 
 ## Płatności i onboarding
 
@@ -76,16 +78,21 @@ Panel pokazuje przeterminowane i dzisiejsze follow-upy w kolejce priorytetowej.
 - AI może podać link success fee dopiero po pozytywnej decyzji i uzyskaniu finansowania albo po potwierdzeniu tego etapu przez operatora,
 - wiadomość zawierająca link nadal wymaga ręcznej akceptacji operatora.
 
-## Panel operatora
+## Panel operatora i logowanie
 
-Po połączeniu panel pokazuje Dashboard, AI Inbox, CRM i System. Dostępne są cztery warianty wyglądu. Klucz operatora może być zapamiętany lokalnie na urządzeniu operatora i nie jest publikowany w repozytorium.
+Dostęp do panelu nie używa już ręcznie wpisywanego klucza operatora. Logowanie odbywa się kontem FlowPilot przez Supabase Auth.
+
+Po poprawnym zalogowaniu przeglądarka przechowuje sesję użytkownika i automatycznie odświeża token. Żądania do danych DotacjaPlus przechodzą przez funkcję `dotacjaplus-ops`, która wymaga ważnego JWT i akceptuje tylko uprawnione role `owner`, `admin`, `operator` albo konto z flagą administratora systemu.
+
+Sekrety backendu Make nie są wysyłane do przeglądarki. Stary wpis `flowpilot_operator_key` jest usuwany z localStorage i sessionStorage podczas uruchomienia nowego panelu.
 
 Dostępne działania:
 
 - `Popraw AI`: generuje nową wersję bez wysyłania,
 - `Odrzuć`: zapisuje decyzję bez wysyłania,
 - `Wyślij do klienta`: wymaga potwierdzenia operatora, wysyła wiadomość i zapisuje decyzję,
-- `Edytuj CRM`: zapisuje statusy, nazwę klienta, następny krok, follow-up i stan onboarding/płatności bez zmiany historii rozmów.
+- `Edytuj CRM`: zapisuje statusy, nazwę klienta, następny krok, follow-up i stan onboarding/płatności bez zmiany historii rozmów,
+- `Pipeline`: pozwala zmieniać etap sprzedaży metodą drag and drop.
 
 ## Formularz WWW
 
@@ -93,7 +100,9 @@ Formularz na landing page zapisuje zgłoszenia w prywatnym repozytorium danych z
 
 ## Zasady bezpieczeństwa
 
-- Nie umieszczać tokenów Meta, klucza operatora ani prywatnych danych w publicznym repozytorium.
+- Nie umieszczać tokenów Meta, prywatnych sekretów backendu ani prywatnych danych w publicznym repozytorium.
+- Do panelu i pipeline wymagane jest konto Supabase z właściwą rolą.
+- Nie przywracać logowania przez statyczny klucz w przeglądarce.
 - Nie włączać automatycznej wysyłki wiadomości bez osobnej decyzji biznesowej.
 - Nie przechowywać numeru rachunku w konfiguracji AI.
 - Nie traktować danych klienta jako instrukcji dla modelu.
@@ -108,12 +117,14 @@ Formularz na landing page zapisuje zgłoszenia w prywatnym repozytorium danych z
 - brak niedokończonych wykonań,
 - zapis ręcznej aktualizacji CRM przechodzi przez Make i GitHub poprawnie,
 - odczyt osobnego strumienia aktualizacji CRM działa,
-- testowe rekordy aktualizacji zostały usunięte z produkcyjnych etykiet,
 - centralna konfiguracja firmy jest pobierana przez Intake,
 - historia rozmów jest filtrowana wyłącznie do rekordów `dp-crm-v1`, więc ręczne wpisy CRM nie zakłócają pamięci wiadomości,
 - link Stripe opłaty początkowej został zweryfikowany na 1100 PLN,
 - utworzono i zweryfikowano link Stripe success fee na 1350 PLN,
-- publiczny panel po wdrożeniu CRM i follow-upów przechodzi test nawigacji i czterech motywów bez widocznych błędów JavaScript i layoutu,
+- wdrożono Supabase Auth dla panelu i pipeline,
+- publiczny panel i pipeline pokazują logowanie e-mail + hasło i nie pokazują pola klucza operatora,
+- nieuwierzytelnione wywołanie funkcji proxy zwraca HTTP 401,
+- publiczne repozytorium nie zawiera starego ani nowego sekretu proxy,
 - wcześniejsze testy Messenger -> AI -> CRM -> panel -> ręczna akceptacja -> Messenger zakończyły się HTTP 200 po stronie Meta dla uprawnionego testowego użytkownika.
 
 ## Zewnętrzny blocker Meta
