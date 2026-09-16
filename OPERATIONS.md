@@ -14,9 +14,9 @@ Stan: produkcyjne MVP DotacjaPlus, oczekuje na odblokowanie pełnego ruchu Messe
 
 Centralna konfiguracja firmy znajduje się wyłącznie w prywatnym repozytorium `investplan-arch/flowpilot-data`, plik `dotacjaplus/config.json`.
 
-Zawiera m.in. cennik, formularz onboardingowy, zasady płatności, regułę rozpoczęcia prac, statusy CRM, zasady researchu i politykę ręcznej akceptacji wiadomości. System Intake pobiera tę konfigurację przy każdym przetwarzaniu wiadomości. Nie wolno kopiować cen, linku Stripe, danych kontaktowych ani warunków współpracy do publicznych plików.
+Zawiera cennik, formularz onboardingowy, aktywne linki Stripe, zasady płatności, regułę rozpoczęcia prac, statusy CRM, zasady researchu i politykę ręcznej akceptacji wiadomości. System Intake pobiera tę konfigurację przy każdym przetwarzaniu wiadomości. Nie wolno kopiować cen, linków Stripe, danych kontaktowych ani warunków współpracy do publicznych plików.
 
-Pole `payment.payment_link` pozostaje puste do czasu podania lub utworzenia zatwierdzonego linku Stripe. System nie może wymyślać linku ani numeru rachunku.
+W konfiguracji są dwa aktywne linki Stripe: opłata początkowa 1100 PLN oraz success fee 1350 PLN. Potwierdzenie płatności w CRM pozostaje decyzją operatora. System nie przechowuje numeru rachunku i nie może wymyślać alternatywnej metody płatności.
 
 ## Architektura produkcyjna
 
@@ -65,6 +65,17 @@ Ręczne zmiany operatora są zapisywane jako osobne rekordy audytowe `dp-crm-upd
 
 Panel pokazuje przeterminowane i dzisiejsze follow-upy w kolejce priorytetowej.
 
+## Płatności i onboarding
+
+- opłata początkowa: 1100 PLN przed rozpoczęciem prac,
+- success fee: 1350 PLN po pozytywnej decyzji i uzyskaniu finansowania,
+- każdy wniosek rozliczany osobno,
+- wyjątek wymaga decyzji operatora,
+- formularz onboardingowy pochodzi z centralnej konfiguracji,
+- AI może podać link do formularza i opłaty początkowej dopiero po wyraźnej chęci rozpoczęcia współpracy lub pytaniu klienta o start,
+- AI może podać link success fee dopiero po pozytywnej decyzji i uzyskaniu finansowania albo po potwierdzeniu tego etapu przez operatora,
+- wiadomość zawierająca link nadal wymaga ręcznej akceptacji operatora.
+
 ## Panel operatora
 
 Po połączeniu panel pokazuje Dashboard, AI Inbox, CRM i System. Dostępne są cztery warianty wyglądu. Klucz operatora może być zapamiętany lokalnie na urządzeniu operatora i nie jest publikowany w repozytorium.
@@ -99,6 +110,10 @@ Formularz na landing page zapisuje zgłoszenia w prywatnym repozytorium danych z
 - odczyt osobnego strumienia aktualizacji CRM działa,
 - testowe rekordy aktualizacji zostały usunięte z produkcyjnych etykiet,
 - centralna konfiguracja firmy jest pobierana przez Intake,
+- historia rozmów jest filtrowana wyłącznie do rekordów `dp-crm-v1`, więc ręczne wpisy CRM nie zakłócają pamięci wiadomości,
+- link Stripe opłaty początkowej został zweryfikowany na 1100 PLN,
+- utworzono i zweryfikowano link Stripe success fee na 1350 PLN,
+- publiczny panel po wdrożeniu CRM i follow-upów przechodzi test nawigacji i czterech motywów bez widocznych błędów JavaScript i layoutu,
 - wcześniejsze testy Messenger -> AI -> CRM -> panel -> ręczna akceptacja -> Messenger zakończyły się HTTP 200 po stronie Meta dla uprawnionego testowego użytkownika.
 
 ## Zewnętrzny blocker Meta
