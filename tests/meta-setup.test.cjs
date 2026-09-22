@@ -1,0 +1,21 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync(__dirname+'/../render/app.html','utf8');
+const start=html.indexOf("el('metaSaveConfig').onclick=async");
+const handler=html.slice(start,html.indexOf("el('metaConnect').onclick=",start));
+const fields=new Map(),calls=[];
+const el=id=>{if(!fields.has(id))fields.set(id,{value:'',disabled:false});return fields.get(id)};
+const ctx={el,STATUS:{user:{system_admin:false}},show(){},text(){},loadStatus:async()=>{},loadAIAdmin:async()=>{},applyRoleUI(){},fn:async(n,p)=>calls.push({n,p})};
+vm.runInNewContext(handler,ctx);
+(async()=>{
+ await el('metaSaveConfig').onclick();assert.equal(calls.length,0);
+ ctx.STATUS.user.system_admin=true;el('metaAppId').value='invalid';
+ await el('metaSaveConfig').onclick();assert.equal(calls.length,0);
+ el('metaAppId').value='123456789';el('metaAppSecret').value='fake-test-secret';
+ await el('metaSaveConfig').onclick();assert.equal(calls.length,1);
+ assert.equal(calls[0].n,'system-config');assert.equal(JSON.parse(calls[0].p.body).meta_app_id,'123456789');
+ assert.equal(el('metaAppSecret').value,'');assert.equal(el('metaSaveConfig').disabled,false);
+ ctx.fn=async()=>{throw Error('failure')};el('metaAppSecret').value='fake-test-secret';
+ await el('metaSaveConfig').onclick();assert.equal(el('metaAppSecret').value,'');
+ assert.ok(html.includes("el('metaConnect').disabled=!admin||!STATUS?.capabilities?.messenger"));
+ console.log('PASS: admin gate, validation, authenticated save, secret cleared on success/failure, capability guard');
+})().catch(e=>{console.error(e.message);process.exitCode=1});
