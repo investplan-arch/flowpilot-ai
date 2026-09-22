@@ -91,7 +91,7 @@
         <article class="serviceCard"><div class="serviceTop"><span class="serviceIcon">M</span><span class="statusTag success">Aktywne</span></div><h3>Messenger Intake</h3><p>Odbiór wiadomości, deduplikacja MID i przypisanie do klienta.</p><div class="serviceMeta"><span>Make</span><strong>Webhook live</strong></div></article>
         <article class="serviceCard"><div class="serviceTop"><span class="serviceIcon">AI</span><span class="statusTag success">Aktywne</span></div><h3>AI Drafting</h3><p>Szkic odpowiedzi korzysta z historii klienta i wymaga ręcznej akceptacji.</p><div class="serviceMeta"><span>OpenAI</span><strong>Human approval</strong></div></article>
         <article class="serviceCard"><div class="serviceTop"><span class="serviceIcon">DB</span><span class="statusTag success">Aktywne</span></div><h3>Prywatny CRM</h3><p>Dane klientów są poza publicznym repozytorium strony.</p><div class="serviceMeta"><span>GitHub private</span><strong>Private data</strong></div></article>
-        <article class="serviceCard"><div class="serviceTop"><span class="serviceIcon">Meta</span><span class="statusTag external">Zewnętrzne</span></div><h3>Meta App Review</h3><p>Pełny ruch zwykłych użytkowników czeka na decyzję Meta.</p><div class="serviceMeta"><span>Meta</span><strong>Review in progress</strong></div></article>
+        <article class="serviceCard"><div class="serviceTop"><span class="serviceIcon">Meta</span><span class="statusTag external">Zewnętrzne</span></div><h3>Meta App Review</h3><p>App Review zatwierdzone i aplikacja opublikowana według operatora (22.09.2026). Odbiór nowych wiadomości wymaga testu produkcyjnego.</p><div class="serviceMeta"><span>Meta</span><strong>Published · test E2E</strong></div></article>
       </div>
     </section>
   </main>
@@ -119,7 +119,7 @@
 <script>
 (()=>{const theme=localStorage.getItem('flowpilot_theme')||'hybrid';document.body.dataset.theme=theme;})();
 </script>
-<script src="app.js?v=20260916-auth"></script>
+<script src="app.js?v=20260922-approval"></script>
 <script>
 (()=>{const meta=document.querySelector('meta[name="theme-color"]');const colors={hybrid:'#0b0f14',linear:'#0d0d12',attio:'#f6f7f9',front:'#f4f7fb'};function applyTheme(theme){document.body.dataset.theme=theme;localStorage.setItem('flowpilot_theme',theme);document.querySelectorAll('[data-theme-choice]').forEach(el=>el.classList.toggle('selected',el.dataset.themeChoice===theme));if(meta)meta.setAttribute('content',colors[theme]||colors.hybrid)}document.querySelectorAll('[data-theme-choice]').forEach(el=>el.addEventListener('click',()=>applyTheme(el.dataset.themeChoice)));applyTheme(document.body.dataset.theme||'hybrid');})();
 </script>

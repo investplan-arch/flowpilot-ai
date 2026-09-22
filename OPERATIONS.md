@@ -1,6 +1,6 @@
 # FlowPilot AI: produkcja i obsługa
 
-Stan: produkcyjne MVP DotacjaPlus, oczekuje na odblokowanie pełnego ruchu Messenger przez Meta App Review.
+Stan: App Review zatwierdzone i aplikacja opublikowana według operatora (22.09.2026). Pełny test z kontem bez roli w aplikacji pozostaje do wykonania.
 
 ## Adresy
 
@@ -127,10 +127,17 @@ Formularz na landing page zapisuje zgłoszenia w prywatnym repozytorium danych z
 - publiczne repozytorium nie zawiera starego ani nowego sekretu proxy,
 - wcześniejsze testy Messenger -> AI -> CRM -> panel -> ręczna akceptacja -> Messenger zakończyły się HTTP 200 po stronie Meta dla uprawnionego testowego użytkownika.
 
-## Zewnętrzny blocker Meta
+## Stan po publikacji Meta — 22.09.2026
 
-Meta App Review pozostaje procesem zewnętrznym. Ostatni potwierdzony stan zgłoszenia FlowPoint: `Review in progress`.
+Operator potwierdził pozytywne App Review i publikację aplikacji. Nie wykonywano ponownej inspekcji konta Meta.
 
-Do zgłoszenia przekazano `pages_show_list`, `pages_manage_metadata`, `pages_messaging` i `public_profile`.
+W bieżącej kontroli:
+- Supabase zgłasza projekt jako ACTIVE_HEALTHY; funkcja dotacjaplus-ops jest aktywna.
+- Publiczny panel odpowiada HTTP 200, a odczyt proxy bez sesji HTTP 401.
+- Repozytorium CRM jest prywatne.
+- Odczyt decyzji przez istniejący backend Make zwrócił HTTP 200 i dwa rekordy.
+- Najnowszy rekord rozmowy w przeglądanej kolejce GitHub pochodzi z 15.09.2026; brak dowodu odbioru po publikacji.
+- Panel wiąże potwierdzenie z treścią i odbiorcą pokazanymi w oknie akceptacji. Zmiana wymaga ponownej akceptacji. Blokada w trakcie żądania ogranicza podwójne kliknięcia w tej karcie przeglądarki.
+- Test regresji: node tests/approval.test.cjs. Test używa atrapy API i niczego nie wysyła.
 
-Do czasu przyznania właściwego dostępu i publikacji aplikacji zwykli użytkownicy strony mogą nie generować webhooków Messenger dla aplikacji. Jest to obecnie główny blocker pełnej produkcji dla wszystkich klientów.
+Do zamknięcia produkcji: wiadomość testowa ze zwykłego konta bez roli w aplikacji → rekord z nowym MID → szkic AI w panelu → ręczna akceptacja operatora → potwierdzona odpowiedź na tym koncie. Kontrola serwerowej deduplikacji wysyłki i aktualnych scenariuszy wymaga dostępu do Make. Testy panelu nie zastępują tej kontroli.
