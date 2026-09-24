@@ -15,11 +15,11 @@ Deno.serve(async req=>{
   const{data:p}=await db.from('internal_oauth_pending_pages').select('*').eq('state',state).eq('page_id',pageId).eq('user_id',u.user.id).eq('organization_id',profile.organization_id).gt('expires_at',now).single();if(!p)return J({error:'page_not_found'},404);
   const{data:claimed}=await db.from('integrations').select('id').eq('provider','facebook').eq('external_page_id',p.page_id).neq('organization_id',profile.organization_id).limit(1);
   if(claimed?.length)return J({error:'page_already_connected_to_another_workspace'},409);
-  const{data:i,error:ie}=await db.from('integrations').upsert({organization_id:p.organization_id,provider:'facebook',external_page_id:p.page_id,display_name:p.page_name,status:'pending',metadata:{channel:'messenger'}},{onConflict:'organization_id,provider,external_page_id'}).select('id').single();if(ie||!i)return J({error:'integration_save_failed'},500);
-  const se=await db.from('internal_integration_secrets').upsert({integration_id:i.id,page_access_token:p.page_access_token,updated_at:new Date().toISOString()});if(se.error)return J({error:'secret_store_failed'},500);
   const x=new URL(`https://graph.facebook.com/v24.0/${encodeURIComponent(p.page_id)}/subscribed_apps`);x.searchParams.set('subscribed_fields','messages,messaging_postbacks');x.searchParams.set('access_token',p.page_access_token);
-  const r=await fetch(x,{method:'POST',signal:AbortSignal.timeout(8000)}),z=await r.json().catch(()=>({}));if(!r.ok||z.success===false){await db.from('integrations').update({status:'error'}).eq('id',i.id);return J({error:'page_subscription_failed'},400)}
-  await db.from('integrations').update({status:'connected',updated_at:new Date().toISOString()}).eq('id',i.id);await db.from('internal_oauth_pending_pages').delete().eq('state',state);await db.from('internal_oauth_states').delete().eq('state',state);
+  const r=await fetch(x,{method:'POST',signal:AbortSignal.timeout(8000)}),z=await r.json().catch(()=>({}));if(!r.ok||z.success===false)return J({error:'page_subscription_failed'},400);
+  const{data:i,error:ie}=await db.from('integrations').upsert({organization_id:p.organization_id,provider:'facebook',external_page_id:p.page_id,display_name:p.page_name,status:'connected',metadata:{channel:'messenger'}},{onConflict:'organization_id,provider,external_page_id'}).select('id').single();if(ie||!i)return J({error:'integration_save_failed'},409);
+  const se=await db.from('internal_integration_secrets').upsert({integration_id:i.id,page_access_token:p.page_access_token,updated_at:new Date().toISOString()});if(se.error)return J({error:'secret_store_failed'},500);
+  await db.from('internal_oauth_pending_pages').delete().eq('state',state);await db.from('internal_oauth_states').delete().eq('state',state);
   await db.from('activity_log').insert({organization_id:profile.organization_id,actor_user_id:u.user.id,event_type:'integration.facebook_configured',entity_type:'integration',entity_id:i.id,data:{page_id:p.page_id}});
   return J({ok:true,page_name:p.page_name});
  }catch(e){return J({error:'internal_error'},500)}
