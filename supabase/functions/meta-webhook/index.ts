@@ -254,9 +254,13 @@ Deno.serve(async (req:Request)=>{
     if(!(await validSig(raw,hs,cfg.meta_app_secret))) return new Response('bad_signature',{status:401});
 
     const payload=JSON.parse(raw);
+    if(payload.object!=='page') return new Response('EVENT_RECEIVED');
 
     for(const entry of payload.entry||[]){
       for(const e of entry.messaging||[]){
+        // Meta echoes outbound messages to page webhooks. They are already
+        // persisted by send-message and must not become inbound leads.
+        if(e.message?.is_echo) continue;
         const pageId=String(entry.id||'');
         const senderId=String(e.sender?.id||'');
         const mid=String(e.message?.mid||'');
@@ -339,7 +343,7 @@ Deno.serve(async (req:Request)=>{
 
         if(!cv) continue;
 
-        await db.from('messages').insert({
+        const {error:messageError}=await db.from('messages').insert({
           organization_id:i.organization_id,
           conversation_id:cv.id,
           external_message_id:mid,
@@ -350,6 +354,7 @@ Deno.serve(async (req:Request)=>{
           status:'received',
           sent_at:new Date().toISOString()
         });
+        if(messageError){console.error('meta_inbound_insert_failed',messageError.code||'db_error');continue;}
 
         await usage(db,i.organization_id,'inbound_messages');
         await rejectPending(db,cv.id);
