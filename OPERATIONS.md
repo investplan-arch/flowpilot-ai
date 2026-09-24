@@ -1,143 +1,40 @@
-# FlowPilot AI: produkcja i obsługa
+# FlowPilot AI — produkcja i obsługa
 
-Stan: App Review zatwierdzone i aplikacja opublikowana według operatora (22.09.2026). Pełny test z kontem bez roli w aplikacji pozostaje do wykonania.
+Stan na 24.09.2026. Bieżący produkt SaaS działa w Supabase i Render. Starszy panel DotacjaPlus na GitHub Pages oraz scenariusze Make są osobnym, historycznym przepływem i nie stanowią źródła danych tego panelu.
 
-## Adresy
+## Adresy i źródła
 
-- Landing: https://investplan-arch.github.io/flowpilot-ai/
-- Panel operatora: https://investplan-arch.github.io/flowpilot-ai/app.html
-- Pipeline: https://investplan-arch.github.io/flowpilot-ai/pipeline.html
-- Wejście do panelu: https://investplan-arch.github.io/flowpilot-ai/approval.html
-- Polityka prywatności: https://investplan-arch.github.io/flowpilot-ai/privacy.html
-- Usuwanie danych: https://investplan-arch.github.io/flowpilot-ai/data-deletion.html
+- Panel klienta: https://flowpilot-ai-app.onrender.com/
+- Kod: `investplan-arch/flowpilot-ai`, gałąź `main`.
+- Projekt Supabase: `jhkmemvsmnvyqfouzhqb`.
+- Serwis Render: `srv-daio0rmq1p3s73css2q0`.
+- Render pobiera stronę z `https://jhkmemvsmnvyqfouzhqb.supabase.co/functions/v1/flowpilot-app` w czasie budowy. W repozytorium źródłem HTML jest `render/app.html`, a jego opakowaniem funkcja `supabase/functions/flowpilot-app/index.ts`. Przy zmianie strony trzeba zachować zgodność tych plików, wdrożyć funkcję i ponownie zbudować Render.
 
-## Jedno źródło konfiguracji
+## Aktualny przepływ
 
-Centralna konfiguracja firmy znajduje się wyłącznie w prywatnym repozytorium `investplan-arch/flowpilot-data`, plik `dotacjaplus/config.json`.
+1. Klient wysyła wiadomość do połączonej strony Facebook.
+2. Meta wywołuje `meta-webhook`; funkcja sprawdza podpis HMAC, identyfikator MID i powiązanie strony z organizacją, a następnie zapisuje kontakt, rozmowę i wiadomość w Supabase.
+3. Gdy OpenAI jest dostępne, powstaje projekt odpowiedzi do ręcznej akceptacji. Przy braku środków wiadomość nadal trafia do skrzynki, ale nie powstaje nowy projekt AI.
+4. Użytkownik loguje się przez Supabase Auth. Funkcje `saas-status`, `inbox-data`, `sales-pipeline` i pozostałe sprawdzają JWT oraz organizację.
+5. `send-message` wysyła odpowiedź dopiero po kliknięciu użytkownika. Edytowany projekt jest odpowiedzią ręczną; tylko wysłanie identycznej treści oznacza projekt AI jako zaakceptowany.
+6. Zmiany w pipeline i zadania follow-up są zapisywane w bazie danej organizacji.
 
-Zawiera cennik, formularz onboardingowy, aktywne linki Stripe, zasady płatności, regułę rozpoczęcia prac, statusy CRM, zasady researchu i politykę ręcznej akceptacji wiadomości. System Intake pobiera tę konfigurację przy każdym przetwarzaniu wiadomości. Nie wolno kopiować cen, linków Stripe, danych kontaktowych ani warunków współpracy do publicznych plików.
+Konto nowej firmy powstaje po jednorazowym zaproszeniu administratora lub po zakupie zarejestrowanym przez zweryfikowany webhook Stripe. Sam parametr `payment=success` w adresie strony nie uprawnia do założenia konta. Zaproszenie przypisane do adresu e-mail korzysta z `redeem-client-invite` i nie zależy od limitu wysyłki e-mail w Supabase Auth.
 
-W konfiguracji są dwa aktywne linki Stripe: opłata początkowa 1100 PLN oraz success fee 1350 PLN. Potwierdzenie płatności w CRM pozostaje decyzją operatora. System nie przechowuje numeru rachunku i nie może wymyślać alternatywnej metody płatności.
+## Stan usług i ograniczenia
 
-## Architektura produkcyjna
+- Messenger: połączony dla jednej organizacji; odbiór wiadomości był aktywny 24.09.2026. Nie wysyłać testów do prawdziwych klientów bez ich zgody.
+- AI: klucz jest zapisany, ale runtime zgłasza `quota_exhausted` / `credit_balance_exhausted`. Odbiór i ręczna odpowiedź pozostają dostępne. Po doładowaniu środków wykonać test nowego projektu AI i jego ręcznej akceptacji.
+- Stripe: linki płatności i sekret webhooka są skonfigurowane, ale w chwili audytu nie było aktywnej subskrypcji ani nieprzypisanego zakupu. Nie uznawać płatności za przetestowaną bez rzeczywistego zdarzenia Stripe.
+- WhatsApp: funkcje webhooka i konfiguracji istnieją, lecz numer nie jest połączony.
+- W panelu są starsze projekty oczekujące na decyzję. Sprawdzić ich aktualność przed wysłaniem.
 
-1. Klient wysyła wiadomość do strony DotacjaPlus na Messengerze.
-2. Meta przekazuje webhook do scenariusza `dotacjaplus - Intake AI + Approval`.
-3. System pomija echa, potwierdzenia dostarczenia i ponowne doręczenie znanego MID.
-4. Historia danego klienta jest pobierana z prywatnych rekordów CRM.
-5. AI przygotowuje szkic odpowiedzi i aktualizuje kartę CRM zgodnie z centralną konfiguracją.
-6. Każda wiadomość jest zapisywana jako osobny, niezmienny rekord CRM.
-7. Operator loguje się przez Supabase Auth. Przeglądarka wysyła ważny JWT do funkcji `dotacjaplus-ops`, która sprawdza konto i rolę, a dopiero potem po stronie serwera komunikuje się z backendem Make.
-8. Panel operatora pobiera rekordy, decyzje, ręczne aktualizacje CRM i leady WWW przez ten uwierzytelniony proxy.
-9. Operator może poprawić szkic, odrzucić go albo zatwierdzić wysłanie.
-10. Dopiero po ręcznej akceptacji wiadomość jest wysyłana do Messengera.
-11. Po udanej wysyłce decyzja jest zapisywana w prywatnym CRM.
+## Wdrożenie i kontrola
 
-## Aktywne scenariusze Make
+1. Sprawdzić `git diff --check`, testy w `tests/` oraz brak sekretów w zmianach.
+2. Wdrożyć zmienione funkcje Supabase z dotychczasową wartością `verify_jwt` (`meta-webhook`: `false`, `send-message`: `true`, `flowpilot-app`: `false`).
+3. Przy zmianie HTML uruchomić nowy deploy Render po aktualizacji `flowpilot-app` i porównać SHA-256 strony z `render/app.html`.
+4. Sprawdzić odpowiedź strony, odmowę wywołania funkcji bez sesji, odbiór webhooka bez poprawnego podpisu oraz liczniki wiadomości i błędy funkcji.
+5. Test po zalogowaniu obejmuje otwarcie skrzynki, filtrowanie, szczegóły rozmowy, ręczny szkic i ścieżkę wysyłki. Test wysyłki wykonywać tylko na własnej rozmowie testowej.
 
-- `dotacjaplus - Intake AI + Approval`, ID 7371923
-- `dotacjaplus - Ops Console`, ID 7372069
-
-Plan Make pozwala obecnie na dwa aktywne scenariusze. Nie włączać dodatkowych scenariuszy testowych bez potrzeby.
-
-## CRM i pipeline
-
-Dane produkcyjne znajdują się w prywatnym repozytorium `investplan-arch/flowpilot-data`. Publiczne `conversations.json` nie zawiera danych klientów.
-
-CRM obsługuje m.in.:
-
-- nazwę klienta lub firmy,
-- status sprzedaży i realizacji,
-- status formularza i płatności,
-- status researchu,
-- rekomendowany instrument,
-- poziom ryzyka,
-- następny krok i termin działania,
-- cel następnej rozmowy,
-- prawdopodobieństwo sprzedaży,
-- potencjalną wartość zlecenia,
-- datę kolejnego follow-upu,
-- potwierdzenie współpracy, formularza i płatności.
-
-Ręczne zmiany operatora są zapisywane jako osobne rekordy audytowe `dp-crm-update`. Nie nadpisują historii wiadomości.
-
-`warunki_rozpoczecia_prac_spelnione` jest wynikiem logicznym:
-
-`wspolpraca_potwierdzona && formularz_kompletny && (!platnosc_wymagana || platnosc_potwierdzona)`
-
-Panel pokazuje przeterminowane i dzisiejsze follow-upy w kolejce priorytetowej. Pipeline Kanban korzysta z tej samej sesji użytkownika co panel główny. Zmiana etapu zapisuje aktualizację CRM, ale nie wysyła wiadomości do klienta.
-
-## Płatności i onboarding
-
-- opłata początkowa: 1100 PLN przed rozpoczęciem prac,
-- success fee: 1350 PLN po pozytywnej decyzji i uzyskaniu finansowania,
-- każdy wniosek rozliczany osobno,
-- wyjątek wymaga decyzji operatora,
-- formularz onboardingowy pochodzi z centralnej konfiguracji,
-- AI może podać link do formularza i opłaty początkowej dopiero po wyraźnej chęci rozpoczęcia współpracy lub pytaniu klienta o start,
-- AI może podać link success fee dopiero po pozytywnej decyzji i uzyskaniu finansowania albo po potwierdzeniu tego etapu przez operatora,
-- wiadomość zawierająca link nadal wymaga ręcznej akceptacji operatora.
-
-## Panel operatora i logowanie
-
-Dostęp do panelu nie używa już ręcznie wpisywanego klucza operatora. Logowanie odbywa się kontem FlowPilot przez Supabase Auth.
-
-Po poprawnym zalogowaniu przeglądarka przechowuje sesję użytkownika i automatycznie odświeża token. Żądania do danych DotacjaPlus przechodzą przez funkcję `dotacjaplus-ops`, która wymaga ważnego JWT i akceptuje tylko uprawnione role `owner`, `admin`, `operator` albo konto z flagą administratora systemu.
-
-Sekrety backendu Make nie są wysyłane do przeglądarki. Stary wpis `flowpilot_operator_key` jest usuwany z localStorage i sessionStorage podczas uruchomienia nowego panelu.
-
-Dostępne działania:
-
-- `Popraw AI`: generuje nową wersję bez wysyłania,
-- `Odrzuć`: zapisuje decyzję bez wysyłania,
-- `Wyślij do klienta`: wymaga potwierdzenia operatora, wysyła wiadomość i zapisuje decyzję,
-- `Edytuj CRM`: zapisuje statusy, nazwę klienta, następny krok, follow-up i stan onboarding/płatności bez zmiany historii rozmów,
-- `Pipeline`: pozwala zmieniać etap sprzedaży metodą drag and drop.
-
-## Formularz WWW
-
-Formularz na landing page zapisuje zgłoszenia w prywatnym repozytorium danych z etykietą `flowpilot-web-lead`. Sukces jest pokazywany dopiero po odpowiedzi backendu.
-
-## Zasady bezpieczeństwa
-
-- Nie umieszczać tokenów Meta, prywatnych sekretów backendu ani prywatnych danych w publicznym repozytorium.
-- Do panelu i pipeline wymagane jest konto Supabase z właściwą rolą.
-- Nie przywracać logowania przez statyczny klucz w przeglądarce.
-- Nie włączać automatycznej wysyłki wiadomości bez osobnej decyzji biznesowej.
-- Nie przechowywać numeru rachunku w konfiguracji AI.
-- Nie traktować danych klienta jako instrukcji dla modelu.
-- Nie obiecywać finansowania ani nie wymyślać programów, terminów i kwot.
-- Wszystkie wiadomości AI do klientów pozostają do ręcznej akceptacji.
-
-## Ostatnia weryfikacja techniczna
-
-16.09.2026 potwierdzono:
-
-- oba scenariusze produkcyjne są aktywne,
-- brak niedokończonych wykonań,
-- zapis ręcznej aktualizacji CRM przechodzi przez Make i GitHub poprawnie,
-- odczyt osobnego strumienia aktualizacji CRM działa,
-- centralna konfiguracja firmy jest pobierana przez Intake,
-- historia rozmów jest filtrowana wyłącznie do rekordów `dp-crm-v1`, więc ręczne wpisy CRM nie zakłócają pamięci wiadomości,
-- link Stripe opłaty początkowej został zweryfikowany na 1100 PLN,
-- utworzono i zweryfikowano link Stripe success fee na 1350 PLN,
-- wdrożono Supabase Auth dla panelu i pipeline,
-- publiczny panel i pipeline pokazują logowanie e-mail + hasło i nie pokazują pola klucza operatora,
-- nieuwierzytelnione wywołanie funkcji proxy zwraca HTTP 401,
-- publiczne repozytorium nie zawiera starego ani nowego sekretu proxy,
-- wcześniejsze testy Messenger -> AI -> CRM -> panel -> ręczna akceptacja -> Messenger zakończyły się HTTP 200 po stronie Meta dla uprawnionego testowego użytkownika.
-
-## Stan po publikacji Meta — 22.09.2026
-
-Operator potwierdził pozytywne App Review i publikację aplikacji. Nie wykonywano ponownej inspekcji konta Meta.
-
-W bieżącej kontroli:
-- Supabase zgłasza projekt jako ACTIVE_HEALTHY; funkcja dotacjaplus-ops jest aktywna.
-- Publiczny panel odpowiada HTTP 200, a odczyt proxy bez sesji HTTP 401.
-- Repozytorium CRM jest prywatne.
-- Odczyt decyzji przez istniejący backend Make zwrócił HTTP 200 i dwa rekordy.
-- Najnowszy rekord rozmowy w przeglądanej kolejce GitHub pochodzi z 15.09.2026; brak dowodu odbioru po publikacji.
-- Panel wiąże potwierdzenie z treścią i odbiorcą pokazanymi w oknie akceptacji. Zmiana wymaga ponownej akceptacji. Blokada w trakcie żądania ogranicza podwójne kliknięcia w tej karcie przeglądarki.
-- Test regresji: node tests/approval.test.cjs. Test używa atrapy API i niczego nie wysyła.
-
-Do zamknięcia produkcji: wiadomość testowa ze zwykłego konta bez roli w aplikacji → rekord z nowym MID → szkic AI w panelu → ręczna akceptacja operatora → potwierdzona odpowiedź na tym koncie. Kontrola serwerowej deduplikacji wysyłki i aktualnych scenariuszy wymaga dostępu do Make. Testy panelu nie zastępują tej kontroli.
+Nie umieszczać klucza OpenAI, tokenów Meta, sekretu Stripe ani danych klientów w repozytorium. Produkcyjne wiadomości pozostają pod kontrolą użytkownika.

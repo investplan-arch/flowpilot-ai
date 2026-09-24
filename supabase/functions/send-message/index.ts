@@ -25,7 +25,8 @@ Deno.serve(async req=>{
   const{data:recent}=await db.from('messages').select('id,external_message_id').eq('conversation_id',cid).eq('direction','outbound').eq('status','sent').eq('body',text).gte('created_at',since).order('created_at',{ascending:false}).limit(1).maybeSingle()
   if(recent?.external_message_id)return J({ok:true,message_id:recent.external_message_id,deduplicated:true})
 
-  if(draftId){const {data:draft}=await db.from('messages').select('id').eq('id',draftId).eq('organization_id',p.organization_id).eq('conversation_id',cid).eq('status','pending_approval').maybeSingle();if(!draft)return J({error:'draft_changed_refresh_conversation'},409)}
+  let approvedDraftText:string|null=null
+  if(draftId){const {data:draft}=await db.from('messages').select('id,body').eq('id',draftId).eq('organization_id',p.organization_id).eq('conversation_id',cid).eq('status','pending_approval').maybeSingle();if(!draft)return J({error:'draft_changed_refresh_conversation'},409);approvedDraftText=draft.body}
   let ext:string|null=null
   try{
    if(i.provider==='telegram'){
@@ -54,7 +55,7 @@ Deno.serve(async req=>{
 
   let approvedDraft=false
   try{
-   if(draftId&&pendingIds.includes(draftId)){approvedDraft=true;await db.from('messages').update({status:'approved'}).eq('id',draftId);await db.from('approvals').update({status:'approved',decided_by:u.user.id,decided_at:new Date().toISOString()}).eq('message_id',draftId)}
+   if(draftId&&pendingIds.includes(draftId)&&text===approvedDraftText){approvedDraft=true;await db.from('messages').update({status:'approved'}).eq('id',draftId);await db.from('approvals').update({status:'approved',decided_by:u.user.id,decided_at:new Date().toISOString()}).eq('message_id',draftId)}
   }catch{}
   try{await db.from('activity_log').insert({organization_id:p.organization_id,actor_user_id:u.user.id,event_type:'message.sent',entity_type:'message',entity_id:String(m?.id||''),data:{channel:i.provider,approved_ai_draft:approvedDraft}})}catch{}
   try{await db.rpc('increment_usage_internal',{p_org:p.organization_id,p_metric:'outbound_messages',p_amount:1})}catch{}

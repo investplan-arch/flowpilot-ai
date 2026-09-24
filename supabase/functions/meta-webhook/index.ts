@@ -306,7 +306,7 @@ Deno.serve(async (req:Request)=>{
           }
         }
 
-        if(!ct) continue;
+        if(!ct) throw new Error('meta_contact_persist_failed');
 
         let {data:cv}=await db.from('conversations').select('id,lead_id,human_takeover')
           .eq('organization_id',i.organization_id)
@@ -341,7 +341,7 @@ Deno.serve(async (req:Request)=>{
           await db.from('conversations').update({last_message_at:new Date().toISOString()}).eq('id',cv.id);
         }
 
-        if(!cv) continue;
+        if(!cv) throw new Error('meta_conversation_persist_failed');
 
         const {error:messageError}=await db.from('messages').insert({
           organization_id:i.organization_id,
@@ -354,7 +354,7 @@ Deno.serve(async (req:Request)=>{
           status:'received',
           sent_at:new Date().toISOString()
         });
-        if(messageError){console.error('meta_inbound_insert_failed',messageError.code||'db_error');continue;}
+        if(messageError){console.error('meta_inbound_insert_failed',messageError.code||'db_error');throw new Error('meta_inbound_persist_failed');}
 
         await usage(db,i.organization_id,'inbound_messages');
         await rejectPending(db,cv.id);
@@ -426,6 +426,6 @@ Deno.serve(async (req:Request)=>{
     return new Response('EVENT_RECEIVED');
   }catch(e){
     console.error(e);
-    return new Response('EVENT_RECEIVED');
+    return new Response('retry_later',{status:500});
   }
 });
