@@ -17,7 +17,7 @@ Deno.serve(async req=>{
   if(!p?.organization_id||!c||c.organization_id!==p.organization_id)return J({error:'not_found'},404)
   const[{data:i},{data:s}]=await Promise.all([db.from('integrations').select('id,provider,status,external_page_id').eq('id',c.integration_id).eq('organization_id',p.organization_id).single(),db.from('internal_integration_secrets').select('page_access_token').eq('integration_id',c.integration_id).single()])
   if(!i||i.status!=='connected'||!s?.page_access_token)return J({error:'integration_not_ready'},400)
-  const maxLen=i.provider==='telegram'?4096:i.provider==='facebook'?2000:0
+  const maxLen=i.provider==='telegram'||i.provider==='whatsapp'?4096:i.provider==='facebook'?2000:0
   if(!maxLen)return J({error:'provider_not_ready'},400)
   if(text.length>maxLen)return J({error:'message_too_long',max_length:maxLen},400)
 
@@ -32,6 +32,9 @@ Deno.serve(async req=>{
     const r=await fetch(`https://api.telegram.org/bot${s.page_access_token}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:c.external_thread_id,text}),signal:AbortSignal.timeout(8000)})
     const z=await r.json().catch(()=>({}));if(!r.ok||!z.ok)return J({error:'telegram_send_failed'},400)
     ext=z.result?.message_id?`tg:${i.id}:${z.result.message_id}`:null
+   }else if(i.provider==='whatsapp'){
+    const r=await fetch(`https://graph.facebook.com/v24.0/${encodeURIComponent(i.external_page_id||'')}/messages`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${s.page_access_token}`},body:JSON.stringify({messaging_product:'whatsapp',to:c.external_thread_id,type:'text',text:{body:text}}),signal:AbortSignal.timeout(8000)})
+    const z=await r.json().catch(()=>({}));if(!r.ok)return J({error:'whatsapp_send_failed'},400);ext=z.messages?.[0]?.id||null
    }else{
     const r=await fetch(`https://graph.facebook.com/v24.0/${encodeURIComponent(i.external_page_id||'')}/messages`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${s.page_access_token}`},body:JSON.stringify({recipient:{id:c.external_thread_id},messaging_type:'RESPONSE',message:{text}}),signal:AbortSignal.timeout(8000)})
     const z=await r.json().catch(()=>({}));if(!r.ok)return J({error:'meta_send_failed'},400);ext=z.message_id||null
