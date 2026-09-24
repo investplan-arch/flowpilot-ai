@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { notifyNewMessage, runInBackground } from '../_shared/notify.ts';
 
 const hex=(b:ArrayBuffer)=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
 async function validSignature(body:string,header:string,secret:string){
@@ -82,6 +83,8 @@ Deno.serve(async(req:Request)=>{
           await db.from('approvals').update({status:'rejected',decided_at:new Date().toISOString()}).in('message_id',ids).eq('organization_id',org).eq('status','pending');
         }
         await db.rpc('increment_usage_internal',{p_org:org,p_metric:'inbound_messages',p_amount:1});
+        const alert=runInBackground(notifyNewMessage(db,{organizationId:org,conversationId:conversation.id,contactName:String(contact?.name||name),channel:'whatsapp',hasDraft:false,preview:body}));
+        if(alert) await alert;
       }
     }
     return new Response('EVENT_RECEIVED');

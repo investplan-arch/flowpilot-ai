@@ -141,3 +141,44 @@ W bieżącej kontroli:
 - Test regresji: node tests/approval.test.cjs. Test używa atrapy API i niczego nie wysyła.
 
 Do zamknięcia produkcji: wiadomość testowa ze zwykłego konta bez roli w aplikacji → rekord z nowym MID → szkic AI w panelu → ręczna akceptacja operatora → potwierdzona odpowiedź na tym koncie. Kontrola serwerowej deduplikacji wysyłki i aktualnych scenariuszy wymaga dostępu do Make. Testy panelu nie zastępują tej kontroli.
+
+## Okno odpowiedzi, powiadomienia i jakość AI (wrzesień 2026)
+
+### Okno odpowiedzi Meta
+`send-message` sprawdza czas od ostatniej wiadomości klienta (`supabase/functions/_shared/reply-window.ts`):
+- Messenger i WhatsApp: zwykła odpowiedź do 24 h;
+- Messenger 24 h – 7 dni: tylko ręczna odpowiedź z tagiem `HUMAN_AGENT`, i tylko jeśli ustawiono `META_HUMAN_AGENT_TAG=true`. Włącz to dopiero, gdy aplikacja Meta ma zatwierdzoną funkcję Human Agent;
+- poza oknem backend zwraca `409 window_closed` i niczego nie wysyła do Meta. Panel pokazuje, ile czasu zostało, i blokuje przycisk wysyłki.
+
+Szkic jest rezerwowany (`pending_approval` → `approved`) przed wysyłką, więc dwa kliknięcia albo dwóch operatorów nie wyślą go dwa razy. Jeśli Meta odrzuci wiadomość, szkic wraca do `pending_approval`.
+
+### Powiadomienia
+- **Przeglądarka:** panel co 30 s sprawdza skrzynkę. Nowa wiadomość zmienia licznik w tytule karty, a po włączeniu w Ustawienia → Powiadomienia pokazuje powiadomienie systemowe, gdy karta jest w tle. Na iPhonie działa tylko po dodaniu panelu do ekranu głównego, dlatego tam lepszy jest e-mail.
+- **E-mail (Resend):** wysyłany z `meta-webhook` i `whatsapp-webhook`. Najwyżej 1 e-mail na rozmowę na 10 minut, do wszystkich członków firmy, którzy nie wyłączyli e-maili w panelu. Treść wiadomości klienta nie trafia do e-maila, chyba że `NOTIFY_INCLUDE_PREVIEW=true`.
+
+Sekrety funkcji (Supabase → Edge Functions → Secrets):
+
+| Zmienna | Wymagana | Opis |
+|---|---|---|
+| `RESEND_API_KEY` | do e-maili | klucz API Resend |
+| `NOTIFY_FROM_EMAIL` | do e-maili | nadawca z zweryfikowanej domeny, np. `FlowPilot <powiadomienia@twojadomena.pl>` |
+| `PANEL_URL` | nie | link w e-mailu, domyślnie `https://flowpilot-ai-app.onrender.com/` |
+| `NOTIFY_THROTTLE_MIN` | nie | minimalny odstęp między e-mailami dla jednej rozmowy, domyślnie 10 |
+| `NOTIFY_INCLUDE_PREVIEW` | nie | `true` = fragment wiadomości klienta w e-mailu (dane osobowe, domyślnie wyłączone) |
+| `META_HUMAN_AGENT_TAG` | nie | `true` = odpowiedzi ręczne 24 h – 7 dni na Messengerze |
+
+Bez `RESEND_API_KEY` i `NOTIFY_FROM_EMAIL` e-maile są wyłączone, a reszta działa normalnie.
+
+### Jakość AI i czas odpowiedzi
+`send-message` zapisuje w `activity_log` (`message.sent`), czy szkic AI został poprawiony (`edited`), oryginał i wersję wysłaną (tylko gdy były różne) oraz czas od wiadomości klienta (`response_seconds`). `saas-status` liczy z tego statystyki z 7 dni pokazywane na ekranie Dzisiaj. Ostatnie poprawki operatora trafiają do promptu jako przykłady stylu (`_shared/style-examples.ts`).
+
+### Kolejność wdrożenia
+1. Funkcje backendu: `supabase functions deploy send-message inbox-data conversation-control ai-draft saas-status meta-webhook whatsapp-webhook`.
+2. Dopiero potem panel: `render/app.html` (Render) i `supabase functions deploy flowpilot-app`.
+
+Nowy panel działa też ze starym backendem, ale przyciski „Krócej / Formalniej…” wymagają nowego `ai-draft`. Stary `ai-draft` zignorowałby polecenie i wygenerował nowy szkic.
+
+### Testy
+- `node tests/approval.test.cjs && node tests/meta-setup.test.cjs`
+- `deno test --no-lock --allow-env --allow-read --import-map=supabase/functions/_tests/import_map.json supabase/functions/_tests/ supabase/functions/_shared/` (backend na atrapie bazy i Meta)
+- `CHROMIUM_PATH=... node tests/panel-e2e/panel-e2e.cjs render/app.html /tmp/shots` (panel w przeglądarce, wymaga `playwright-core`)

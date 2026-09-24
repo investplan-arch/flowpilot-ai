@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { emailAlertsConfigured } from '../_shared/notify.ts'
 const C={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'GET,OPTIONS','Cache-Control':'no-store'}
 const J=(x:any,s=200)=>new Response(JSON.stringify(x),{status:s,headers:{...C,'Content-Type':'application/json'}})
 Deno.serve(async req=>{
@@ -20,8 +21,16 @@ Deno.serve(async req=>{
    db.from('messages').select('id',{count:'exact',head:true}).eq('organization_id',org).eq('status','pending_approval'),
    db.from('internal_system_config').select('openai_api_key,meta_app_id,meta_app_secret,ai_status,ai_last_error,ai_last_checked_at').eq('id',true).single()
   ])
+  // Last 7 days of sent replies (logged by send-message): share of AI drafts sent unchanged and median response time.
+  let quality:any={drafts_sent_7d:0,drafts_unedited_7d:0,median_response_seconds_7d:null}
+  try{
+   const {data:sent}=await db.from('activity_log').select('data').eq('organization_id',org).eq('event_type','message.sent').gte('created_at',new Date(Date.now()-7*86400000).toISOString()).limit(2000)
+   const rows=(sent||[]).map((r:any)=>r.data||{}),drafts=rows.filter((d:any)=>d.approved_ai_draft)
+   const secs=rows.map((d:any)=>Number(d.response_seconds)).filter((n:number)=>Number.isFinite(n)&&n>=0).sort((a:number,b:number)=>a-b)
+   quality={drafts_sent_7d:drafts.length,drafts_unedited_7d:drafts.filter((d:any)=>d.edited===false).length,median_response_seconds_7d:secs.length?secs[Math.floor((secs.length-1)/2)]:null}
+  }catch{}
   const trialEnds=o?.trial_ends_at?new Date(o.trial_ends_at):null,days=trialEnds?Math.max(0,Math.ceil((trialEnds.getTime()-Date.now())/86400000)):null
-  return J({organization:{...o,trial_days_left:days},ai:{ready:!!((s?.company_context||'').trim()&&(s?.company_offer||'').trim()),engine_ready:!!cfg?.openai_api_key&&cfg?.ai_status!=='quota_exhausted',goal:s?.business_goal||'qualify',autonomy:s?.autonomy||'approval',tone:s?.tone||'professional',runtime_status:cfg?.ai_status||'unknown',last_error:cfg?.ai_last_error||null,last_checked_at:cfg?.ai_last_checked_at||null},capabilities:{messenger:!!(cfg?.meta_app_id&&cfg?.meta_app_secret),telegram:true},integrations:ints||[],usage:usage||{inbound_messages:0,outbound_messages:0,ai_drafts:0,hot_leads:0},metrics:{conversations:convCount||0,hot_leads:hotCount||0,pending_approvals:pendingCount||0,won_leads:wonCount||0,team_members:teamCount||0,due_followups:dueCount||0},user:{role:p.role,system_admin:p.system_admin}})
+  return J({organization:{...o,trial_days_left:days},ai:{ready:!!((s?.company_context||'').trim()&&(s?.company_offer||'').trim()),engine_ready:!!cfg?.openai_api_key&&cfg?.ai_status!=='quota_exhausted',goal:s?.business_goal||'qualify',autonomy:s?.autonomy||'approval',tone:s?.tone||'professional',runtime_status:cfg?.ai_status||'unknown',last_error:cfg?.ai_last_error||null,last_checked_at:cfg?.ai_last_checked_at||null},capabilities:{messenger:!!(cfg?.meta_app_id&&cfg?.meta_app_secret),telegram:true,email_notifications:emailAlertsConfigured()},integrations:ints||[],usage:usage||{inbound_messages:0,outbound_messages:0,ai_drafts:0,hot_leads:0},metrics:{conversations:convCount||0,hot_leads:hotCount||0,pending_approvals:pendingCount||0,won_leads:wonCount||0,team_members:teamCount||0,due_followups:dueCount||0,...quality},user:{role:p.role,system_admin:p.system_admin}})
  }catch(e){return J({error:'internal_error'},500)}
 })
 

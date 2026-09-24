@@ -14,6 +14,17 @@ Deno.serve(async req=>{
     const {data:profile}=await db.from('profiles').select('organization_id').eq('id',user.id).single();
     const body=await req.json().catch(()=>({}));
     const id=String(body.conversation_id||''),takeover=body.human_takeover;
+    if(profile?.organization_id&&id&&typeof body.reject_draft_id==='string'&&body.reject_draft_id){
+      // Operator discards the AI draft. Only a draft that is still pending can be rejected.
+      const {data:draft,error:rejectError}=await db.from('messages').update({status:'rejected'})
+        .eq('id',body.reject_draft_id).eq('organization_id',profile.organization_id).eq('conversation_id',id)
+        .eq('sender_type','ai').eq('status','pending_approval').select('id').maybeSingle();
+      if(rejectError)return json({error:'update_failed'},500);
+      if(!draft)return json({error:'draft_changed_refresh_conversation',message:'Szkic został już wysłany lub odrzucony. Odśwież rozmowę.'},409);
+      await db.from('approvals').update({status:'rejected',decided_by:user.id,decided_at:new Date().toISOString()}).eq('message_id',draft.id).eq('organization_id',profile.organization_id).eq('status','pending');
+      await db.from('activity_log').insert({organization_id:profile.organization_id,actor_user_id:user.id,event_type:'draft.rejected',entity_type:'message',entity_id:draft.id,data:{conversation_id:id}});
+      return json({ok:true,rejected:draft.id});
+    }
     if(!profile?.organization_id||!id||typeof takeover!=='boolean')return json({error:'invalid_request'},400);
     const {data:conversation,error}=await db.from('conversations').update({human_takeover:takeover}).eq('id',id).eq('organization_id',profile.organization_id).select('id,human_takeover').maybeSingle();
     if(error)return json({error:'update_failed'},500);

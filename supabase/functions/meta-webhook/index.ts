@@ -1,4 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { notifyNewMessage, runInBackground } from '../_shared/notify.ts';
+import { styleExamples } from '../_shared/style-examples.ts';
 
 const clean=(v:any)=>String(v||'')
   .replace(/[—–]/g,',')
@@ -191,7 +193,7 @@ Zasady kwalifikacji: ${s?.qualification_rules||''}.
 Tematy zakazane: ${s?.forbidden_topics||''}.
 Handoff: ${s?.handoff_rules||''}.
 Instrukcje właściciela: ${s?.system_instructions||''}.
-Ton: ${s?.tone||'naturalny'}.
+Ton: ${s?.tone||'naturalny'}.${await styleExamples(db,s?.organization_id)}
 Zwróć wyłącznie JSON {"draft":"","score":0,"intent":"","urgency":"low|medium|high","summary":"","recommended_action":""}.`;
 
     const model=cfg.ai_model&&cfg.ai_model!=='demo-v1'?cfg.ai_model:'gpt-5.6-luna';
@@ -420,6 +422,9 @@ Deno.serve(async (req:Request)=>{
             }
           });
         }catch{}
+
+        const alert=runInBackground(notifyNewMessage(db,{organizationId:i.organization_id,conversationId:cv.id,contactName:String(ct.name||''),channel:'messenger',hasDraft:!!draftId,preview:body}));
+        if(alert) await alert;
       }
     }
 

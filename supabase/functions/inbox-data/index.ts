@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { humanAgentEnabled, replyWindow } from '../_shared/reply-window.ts';
 
 const C = {
   'Access-Control-Allow-Origin': '*',
@@ -46,11 +47,14 @@ Deno.serve(async (req:Request)=>{
       ]);
 
       if((mRes as any).error) return J({error:'messages_query_failed'},500);
+      const msgs=(mRes as any).data||[];
+      const lastInbound=[...msgs].reverse().find((m:any)=>m.direction==='inbound');
       return J({
+        reply_window:replyWindow(c.channel,lastInbound?.created_at,Date.now(),humanAgentEnabled()),
         conversation:c,
         contact:(ctRes as any).data||null,
         lead:(lRes as any).data||null,
-        messages:(mRes as any).data||[]
+        messages:msgs
       });
     }
 
@@ -75,9 +79,18 @@ Deno.serve(async (req:Request)=>{
     const {data:summaries,error:summaryError}=await db.rpc('inbox_summaries_internal',{p_org:org,p_ids:rows.map((c:any)=>c.id)});
     if(summaryError)return J({error:'summary_query_failed'},500);
     const sm=Object.fromEntries((summaries||[]).map((x:any)=>[x.conversation_id,x]));
+    // Time of the customer's latest message per conversation: waiting time and reply window.
+    const li:Record<string,string>={};
+    if(rows.length){
+      const {data:ins}=await db.from('messages').select('conversation_id,created_at')
+        .eq('organization_id',org).eq('direction','inbound').in('conversation_id',rows.map((c:any)=>c.id))
+        .order('created_at',{ascending:false}).limit(2000);
+      for(const m of ins||[]) if(!li[m.conversation_id]) li[m.conversation_id]=m.created_at;
+    }
     return J({has_more:(csRes.data||[]).length>50,
       conversations:rows.map((c:any)=>({
         ...c,...(sm[c.id]||{}),
+        last_inbound_at:li[c.id]||null,
         contact:cm[c.contact_id]||null,
         lead:lm[c.lead_id]||null
       }))
